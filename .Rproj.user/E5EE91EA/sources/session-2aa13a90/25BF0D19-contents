@@ -1,0 +1,64 @@
+---
+title: "Quantifying History"
+subtitle: "Norwegian Research School in History, NTNU, Trondheim"
+date: "November 21-25, 2022"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+---
+
+<h2>Reading List</h2>
+<br>
+
+<h3>Numbers and Categories</h3>
+
+- Hudson, P., & Ishizu, M. (2017), History by numbers. An introduction to quantitative approaches (Bloomsbury).
+
+<h4>Additional suggested readings:</h4> 
+
+- Lemercier, C., & Zalc, C. (2019), Quantitative Methods in the Humanities: An Introduction. 
+
+- Graham, S., Milligan, I., Weingart, S. B., & Martin, K. (2022; 2nd edition). Exploring big historical data: the historian’s macroscope.
+
+- Feinstein, C.H., & Thomas, M. (2002), Making history count: A primer in quantitative methods for historians.
+
+<br>
+
+<h3>Texts</h3>
+
+<h4>Topic models</h4> 
+
+- Blei, D. M. (2012). Probabilistic topic models. Communications of the ACM 55 (4): 77–84.
+
+- Schmidt, B. M. (2012). Words alone: Dismantling topic models in the humanities. Journal of Digital Humanities, 2(1).
+
+<h4>Word embedding</h4>
+
+- Kozlowski, A. C., Taddy, M., & Evans, J. A. (2019). The geometry of culture: Analyzing the meanings of class through word embeddings. American Sociological Review, 84(5), 905–949.
+
+<h4>General</h4>
+
+- Schmidt, B. M. (2016). Do digital humanists need to understand algorithms? In Debates in the Digital Humanities (Vol. 53), Matthew Gould and Lauren Klein (eds.).
+
+- Bollen, Johan, et al. "Historical language records reveal a surge of cognitive distortions in recent decades." Proceedings of the National Academy of Sciences 118.30 (2021): https://www.pnas.org/doi/full/10.1073/pnas.2102061118 [Skim quickly for argument and to understand their source base]
+
+- Ben Schmidt on Twitter https://twitter.com/benmschmidt/status/1419497587296571395
+
+<br>
+
+<h3>R Programming - Coding preparation</h3>
+
+- [R Tutorial](docs/TutorialInstructions.html).
+
+<h4>Additional suggested readings</h4>
+
+These are not necessary prior to the workshop but are good reference materials for R and quantitative methods for further use. 
+
+- Wickham, H. & Grolemund, G. (2022), R for Data Science. https://r4ds.had.co.nz
+
+- Imai, K., & Webb Williams, N. (2022), Quantitative Social Science: An introduction in tidyverse. 
+
+- Hermansen, Silje S.L. (2019) Lær deg R: en innføring i statistikkprogrammets muligheter. [en fin norskspråklig innføring i R og i kvantitative metoder med gode samfunnsvitenskapelige eksempler]

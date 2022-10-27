@@ -1,0 +1,670 @@
+library(readxl)
+library(ggplot2)
+library(readtext)
+library(feather)
+library(textclean)
+library(readtext)
+library(quanteda)
+library(SnowballC)
+library(unine)
+library(tabulizer)
+library(pdftools)
+library(gridExtra)
+library(stm)
+library(quanteda.textstats)
+library(tidyverse)
+
+#setwd("~/pCloudDrive/Work/Projects/Elektritizitätswirtschaft/Geschäftsberichte")
+setwd("P:/Work/Projects/Elektritizitätswirtschaft/Geschäftsberichte")
+
+######### LOAD ############
+df1 <- readRDS('Geschaeftsberichte_EN')
+df <- readRDS('Geschaeftsberichte_EN_noformat') # df with formatting /r/n removed
+##########################
+df_old <- readRDS('Geschaeftsberichte_EN_noformat_old') # df with formatting /r/n removed
+
+
+df %>%
+  summarize(sum(wc))
+
+## NLP
+df %>% 
+  #as_tibble() %>%
+  mutate(words = str_count(text, "([Ss]olar)|([Ww]ind)")) %>%
+  select(year, company, words, wc) %>%
+  group_by(year, company) %>%
+  summarize(sum = sum(words), totwords = sum(wc)) %>%
+  mutate(words1000 = sum/totwords * 1000) %>%
+  ggplot(aes(x = year, y = words1000, group = company, color = company)) + #, group = Partei, color = Partei)) +
+  geom_point() +
+  geom_line() +
+  labs(x = 'Year', y = 'Frequency per 1000 words', title = "'Solar' or 'wind'", subtitle = 'Word frequency in annual reports')+
+  theme_bw()p
+
+df %>% 
+  #as_tibble() %>%
+  mutate(words = str_count(text, "[Rr]enewable")) %>%
+  select(year, company, words, wc) %>%
+  group_by(year, company) %>%
+  summarize(sum = sum(words), totwords = sum(wc)) %>%
+  mutate(words1000 = sum/totwords * 1000) %>%
+  ggplot(aes(x = year, y = words1000, group = company, color = company)) + #, group = Partei, color = Partei)) +
+  geom_point() +
+  geom_line() +
+  labs(x = 'Year', y = 'Frequency per 1000 words', title = "'Renewable(s)'", subtitle = 'Word frequency in annual reports')+
+  theme_bw()
+
+df %>% 
+  #as_tibble() %>%
+  mutate(words = str_count(text, "[Cc]oal")) %>%
+  select(year, company, words, wc) %>%
+  group_by(year, company) %>%
+  summarize(sum = sum(words), totwords = sum(wc)) %>%
+  mutate(words1000 = sum/totwords * 1000) %>%
+  ggplot(aes(x = year, y = words1000, group = company, color = company)) + #, group = Partei, color = Partei)) +
+  geom_point() +
+  geom_line() +
+  labs(x = 'Year', y = 'Frequency per 1000 words', title = "'Coal'", subtitle = 'Word frequency in annual reports')+
+  theme_bw()
+
+
+dividende <- df %>% 
+  mutate(words = str_count(text, "[Dd]ividende")) 
+invest <- df %>% 
+  mutate(words = str_count(text, "[Ii]nvestition")) 
+
+as_tibble(energiewende) %>%
+  #group_by(Partei, WP) %>%
+  #summarize(total = sum(words), wc_party = sum(wc)) %>%
+  #summarize(wc_party = sum(wc)) %>%
+  #filter(total > 15) %>%
+  group_by(company, year) %>%
+  scale_x_continuous(limits = c(1997,2018), breaks = seq(1997,2018,2)) %>%
+  ggplot(aes(x = year, y = words)) + #, group = Partei, color = Partei)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Number of Statements Containing the Word Stem 'Electriktriz-' (n>5)")
+
+ngram <- function(x) {
+  df %>%
+    mutate(words = (str_count(text, x))) %>%
+    select(year, company, words, wc) %>%
+    filter(company != 'innogy' & company != 'Uniper') %>%
+    group_by(year, company) %>%
+    dplyr::summarise(words = sum(words), tot = sum(wc)) %>%
+    mutate(words = words/tot * 1000) %>%
+    ggplot(aes(x = year, y = words, group = company, color = company)) +
+    geom_point(aes(shape = company)) +
+    geom_line(aes(linetype = company)) +
+    #scale_x_continuous(limits = c(1997,2018), breaks = seq(1997,2018,2)) +
+    theme_bw() +
+    guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+    theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+          legend.text=element_text(size=10)) +
+    scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+    #labs(title = 'Word frequencies in Year-end Reports to Investors', subtitle = (paste0("Word Stem: ", x)), y = 'Frequency per thousand words', x = 'Year')
+    labs(subtitle = (paste0("Word Stem: ", x)), y = 'Frequency per thousand words', x = 'Year')  
+}
+
+## other interesting: 
+ngram('[Ss]olar')
+ngram('[Ww]ind')
+ngram('[Dd]ividend')
+ngram('[Pp]rofit')
+ngram('[Ff]uture')
+ngram('[Cc][Oo]2')
+ngram('[Cc]limate')
+ngram('[Ff]inancing')
+ngram('[Gg]reen')
+ngram('[Cc]oal')
+ngram('([Ee]nvironment)|([Cc]limate)')
+ngram('[Cc]ompetition')
+ngram('[Ii]nnovation')
+ngram('[Tt]ransformation')
+
+## FIGURE 2: ECOLOGICAL ECONOMICS SUBMIT
+# SIZE> 957x500
+(r <- ngram('[Rr]enewable'))
+(l <- ngram('[Ww]ind'))
+grid.arrange(r,l, nrow = 1)
+
+#### stm topic modeling ############
+
+## stemming
+# d <- data.frame()
+# for (i in nrow(df)){
+#   tib <- tibble(line = 1, text = df$text[i])
+#   temp <- tib %>%
+#     unnest_tokens(word, text) %>%
+#     mutate(word = german_stemmer(word)) %>%
+#     nest(word) %>%
+#     mutate(text = map(data, unlist), 
+#            text = map_chr(text, paste, collapse = " "))
+#   d <- rbind(d, temp$text)
+# }
+#Quanteda for prepping docs
+corp <- corpus(df, text_field = 'text')
+toks <- tokens(corp, remove_numbers = TRUE, remove_punc = TRUE, remove_symbols = TRUE, remove_separators = TRUE)
+toks <- tokens_remove(toks, pattern = '([^A-z])|(^[A-z]$)', valuetype = 'regex')
+toks <- tokens_remove(toks, pattern = 'xxxxxxxx', valuetype = 'regex')
+toks <- tokens_tolower(toks)
+
+kwic(toks, 'good')
+kwic(toks, 'xxxxxxxx')
+dfm <- dfm(toks, remove = stopwords(language = 'en'), stem = TRUE, valuetype = 'regex')
+#dfm <- dfm(toks, remove = de_stop$word, valuetype = 'regex')
+
+#stm for prepping docs
+df_nonames <- df %>% 
+  mutate(text1 = str_replace_all(text, 'unipe|RWE|Vattenfal|innog|E.ON|EnBW', '')) %>%
+  mutate(text1 = str_replace_all(text1, 'xxxxxxxx', '')) %>%
+  filter(company != 'Uniper' & company != 'innogy') %>%
+  select(year, company, text1)
+temp <- textProcessor(documents=df_nonames$text1, metadata=df_nonames)
+out <- prepDocuments(temp$documents, temp$vocab, temp$meta)
+
+
+stmFit10 <- stm(dfm, K = 10, max.em.its = 75,  init.type = "Spectral")
+stmFit15 <- stm(dfm, K = 15, max.em.its = 75,  init.type = "Spectral")
+stmFit20 <- stm(dfm, K = 20, max.em.its = 75,  init.type = "Spectral")
+stmFit25 <- stm(dfm, K = 25, max.em.its = 75,  init.type = "Spectral")
+stmFit25_vars <- stm(out$documents, out$vocab, K = 25, max.em.its = 20,  init.type = "Spectral", prevalence =~ company + year, data = out$meta)
+
+stmFit30 <- stm(dfm, K = 30, max.em.its = 75,  init.type = "Spectral")
+stmFit40 <- stm(dfm, K = 40, max.em.its = 75,  init.type = "Spectral")
+stmFit50 <- stm(dfm, K = 50, max.em.its = 75,  init.type = "Spectral")
+
+plot(stmFit25_vars, type = "summary", xlim = c(0, .3))
+labelTopics(stmFit25_vars)
+out$meta$company <- as.factor(out$meta$company)
+out$meta$year <- as.factor(out$meta$year)
+prep <- estimateEffect(1:25 ~ company + year, stmFit25_vars, meta = out$meta, uncertainty = "Global")
+summary(prep, topics=c(1:25))
+
+
+labelTopics(stmFit10)
+labelTopics(stmFit15)
+labelTopics(stmFit20)##
+labelTopics(stmFit25) ## These two best?
+labelTopics(stmFit25_vars)
+labelTopics(stmFit30)
+labelTopics(stmFit40)
+labelTopics(stmFit50)
+
+## Seems like running stm with covariates mkes the topics too closely tied to the names of the companies. More so that did when run through quanteda
+## doc prep without covariates. Try to run w/o covariates as part of the fitting algorithm, OR remove names of companies.
+
+stmFit15_novars <- stm(out$documents, out$vocab, K = 15, max.em.its = 75,  init.type = "Spectral", data = out$meta)
+stmFit25_novars <- stm(out$documents, out$vocab, K = 25, max.em.its = 75,  init.type = "Spectral", data = out$meta)
+stmFit35_novars <- stm(out$documents, out$vocab, K = 35, max.em.its = 75,  init.type = "Spectral", data = out$meta)
+stmFit45_novars <- stm(out$documents, out$vocab, K = 45, max.em.its = 75,  init.type = "Spectral", data = out$meta)
+stmFit25_novars <- stm(out$documents, out$vocab, K = 25, max.em.its = 75,  init.type = "Spectral")
+
+labelTopics(stmFit25_novars)
+
+## Graphing selected topics from theta matrix
+theta <- stmFit25_vars$theta
+y <- out$meta$year
+companies <- out$meta$company
+total <- as.tibble(cbind(theta[,c(1, 2, 4, 6, 8, 11, 19, 22, 24)], y)) # selecting topics to graph
+total['Company'] <- companies
+total['Year'] <- y
+colnames(total) <- c('Nuclear', 'Grid', 'Growth', 'ElMarkets', 'Finances', 'Finacial', 'Shareholding', 'Renewables',
+                     'FinancialRisk', 'Year', 'Company')
+# Plot of certain topics by company over time
+total[,c(1:11)] %>%
+  gather(Nuclear, Grid, Growth, ElMarkets, Finances, Finacial, Shareholding, Renewables,
+         FinancialRisk, key = 'Topic', value = 'theta') %>%
+  group_by(Year, Company, Topic) %>%
+  mutate(theta = as.numeric(theta)) %>%
+  summarize(mean_theta = mean(theta, na.rm = T)) %>%
+  ggplot(aes(Year, mean_theta, group = Company, color = Company)) +
+  #geom_point() +
+  geom_line() +
+  facet_wrap(~ Topic, scales = 'fixed') +
+  #geom_smooth(aes(y=mean_th, x=y), method = lm, formula = y ~ poly(x, 7), se = F) +
+  labs(x = 'Year', y = expression(paste('Mean ', theta)),
+       title = "Proportion of each electricity-related topics over time",
+       subtitle = "In statements containing term strÃÂ¸m") +
+  theme_bw()
+
+
+## Removing company names as they're not really adding anything, and even all mean the same thing in these docs - stopwords as such
+toks_nonames <- tokens_remove(toks, pattern = 'unipe|rwe|vattenfal|innog|eon|enbw', valuetype = 'regex')
+kwic(toks_nonames, 'enbw')
+toks_nonames <- tokens_remove(toks_nonames, pattern = stopwords(language = 'en'))
+toks_nonames <- tokens_subset(toks_nonames, ntoken(toks_nonames) > 10)
+sum(ntoken(toks_nonames) < 10)
+dfm_nonames <- dfm(toks_nonames, stem = TRUE, valuetype = 'regex')
+dfm_nostem <-  dfm(toks_nonames, stem = FALSE, valuetype = 'regex')
+
+stmFit20_nonames <- stm(dfm_nonames, K = 20, max.em.its = 25,  init.type = "Spectral")
+stmFit25_nonames <- stm(dfm_nonames, K = 25, max.em.its = 25,  init.type = "Spectral")
+stmFit35_nonames <- stm(dfm_nonames, K = 35, max.em.its = 25,  init.type = "Spectral")
+
+dfm_nonames_trim1 <- dfm_trim(dfm_nonames, max_docfreq = 0.95, min_docfreq=0.005,docfreq_type="prop")
+stmFit20_nonames_trim1 <- stm(dfm_nonames_trim1, K = 20, max.em.its = 25,  init.type = "Spectral")
+stmFit25_nonames_trim1 <- stm(dfm_nonames_trim1, K = 25, max.em.its = 25,  init.type = "Spectral")
+stmFit35_nonames_trim1 <- stm(dfm_nonames_trim1, K = 30, max.em.its = 25,  init.type = "Spectral")
+stmFit15_nonames_trim1 <- stm(dfm_nonames_trim1, K = 15, max.em.its = 25,  init.type = "Spectral")
+
+dfm_nonames_trim2 <- dfm_trim(dfm_nonames, min_docfreq=0.005, docfreq_type="prop")
+stmFit20_nonames_trim2 <- stm(dfm_nonames_trim1, K = 20, max.em.its = 25,  init.type = "Spectral")
+stmFit25_nonames_trim2 <- stm(dfm_nonames_trim1, K = 25, max.em.its = 25,  init.type = "Spectral")
+stmFit35_nonames_trim2 <- stm(dfm_nonames_trim1, K = 30, max.em.its = 25,  init.type = "Spectral")
+
+## All these pretty good and align with each other, more granularity with greater K
+labelTopics(stmFit20_nonames)
+labelTopics(stmFit25_nonames) 
+labelTopics(stmFit35_nonames) # SO - almost every topic identifiable
+
+labelTopics(stmFit35_nonames_trim1) # also quite good
+labelTopics(stmFit25_nonames_trim1) # Good
+labelTopics(stmFit20_nonames_trim1)
+labelTopics(stmFit15_nonames_trim1)
+
+labelTopics(stmFit35_nonames_trim2) 
+labelTopics(stmFit25_nonames_trim2) # v. good too
+labelTopics(stmFit20_nonames_trim2)
+
+## Graphing selected topics from theta matrix
+theta <- stmFit35_nonames_trim1$theta
+y <- dfm_nonames_trim1@docvars$year
+companies <- dfm_nonames_trim1@docvars$company
+total <- as.tibble(cbind(theta[,c(3, 4, 7, 8, 9, 13, 15, 17, 20, 22, 24, 26, 27, 28)], y)) # selecting topics to graph
+total['Company'] <- companies
+total['Year'] <- y
+colnames(total) <- c('EastEurope', 'ElMarket', 'HeatHydro', 'Financing', 'Finances', 'NuclearReg', 'Electrification',
+                     'EnergyMarket', 'Coal', 'Wind', 'NewProjects', 'StockPrices', 'NewInvest', 'Grid', 'Year', 'Company')
+# Plot of certain topics by company over time
+total[,c(1:16)] %>%
+  gather(EastEurope, ElMarket, HeatHydro, Financing, Finances, NuclearReg, Electrification,
+         EnergyMarket, Coal, Wind, NewProjects, StockPrices, NewInvest, Grid, key = 'Topic', value = 'theta') %>%
+  group_by(Year, Company, Topic) %>%
+  mutate(theta = as.numeric(theta)) %>%
+  summarize(mean_theta = mean(theta, na.rm = T)) %>%
+  ggplot(aes(Year, mean_theta, group = Company, color = Company)) +
+  #geom_point() +
+  geom_line() +
+  facet_wrap(~ Topic, scales = 'fixed') +
+  #geom_smooth(aes(y=mean_th, x=y), method = lm, formula = y ~ poly(x, 7), se = F) +
+  labs(x = 'Year', y = expression(paste('Mean ', theta)),
+       title = "Proportion of each electricity-related topics over time",
+       subtitle = "In statements containing term strÃÂ¸m") +
+  theme_bw()
+
+## Making a function out of this to ease graph creation
+makeTmGraph <- function(stmmodel, dfm, topics, topnums){
+  mod <- stmmodel
+  theta <- mod$theta
+  y <- dfm@docvars$year
+  companies <- dfm@docvars$company
+  total <- as.tibble(cbind(theta[,topnums], y)) # selecting topics to graph
+  total['Company'] <- companies
+  total['Year'] <- y
+  colnames(total) <- c(topics, 'Year', 'Company')
+  #topics_ <- syms(topics)
+  total[,c(1:length(topics)+2)] %>%
+    gather(any_of(topics), key = 'Topic', value = 'theta') %>%
+    group_by(Year, Company, Topic) %>%
+    mutate(theta = as.numeric(theta)) %>%
+    summarize(mean_theta = mean(theta, na.rm = T)) %>%
+    ggplot(aes(Year, mean_theta, group = Company, color = Company)) +
+    #geom_point() +
+    geom_line() +
+    facet_wrap(~ Topic, scales = 'fixed') +
+    #geom_smooth(aes(y=mean_th, x=y), method = lm, formula = y ~ poly(x, 7), se = F) +
+    labs(x = 'Year', y = expression(paste('Mean ', theta)),
+         title = "Proportion of each electricity-related topics over time",
+         subtitle = "From annual reports") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust=1))+
+    scale_x_discrete(breaks = seq(min(y), max(y), 2))
+}
+
+tps <- c('New markets', 'Smart tech', 'Grid', 'Revenues', 'Nuclear', 'Wind', 'Shares', 'Risk', 'New Markets', 'Coal', 'New Projects')
+nums <- c(3, 4, 6, 13, 14, 16,20, 21,22, 23,24)
+makeTmGraph(stmFit35_nonames, dfm_nonames_trim1, tps, nums)
+
+nums <- c(1,2,3,4,5,6,10,11,15,16,17,18,19,20,21,22)
+t <- c('Strategy','RE','Ideas','Boards','German El','Gas','Financials','Gas Revenue','Network','Reportng','Energy','New Technology','Personell','Boards', 'Share','El trading')
+makeTmGraph(stmFit25_vars, dfm_nonames, t, nums)
+
+################# COSINE DISTANCE
+
+sim_matrix <- function(var, sub = NA, dfm = dfm) {
+  if (is.na(sub) != TRUE){
+    dfm <- dfm_subset(dfm, year == sub) 
+  }
+  grouped_dfm <- dfm(dfm, stem = F, groups = var)
+  #c <- which(colnames(dt_recent) == var)
+  c <- grouped_dfm@Dimnames$docs
+  #l <- names(table(dt_recent[,c]))
+  l <- c
+  simil <- textstat_simil(grouped_dfm, grouped_dfm, margin = 'documents', method = 'cosine')
+  return(simil)  
+}
+
+head(df)
+head(df_old)
+
+# not seeing much order or structure here
+corp <- corpus(df, text_field = 'text')
+toks <- tokens(corp, remove_numbers = TRUE, remove_punc = TRUE, remove_symbols = TRUE, remove_separators = TRUE)
+toks <- tokens_remove(toks, pattern = '([^A-z])|(^[A-z]$)', valuetype = 'regex') # strips non letter at begin or end of string
+toks <- tokens_remove(toks, pattern = 'xxxxxxxx', valuetype = 'regex')
+toks <- tokens_tolower(toks)
+kwic(toks, 'good') # checking
+kwic(toks, 'xxxxxxxx') #checking
+dfm_nostem <- dfm(toks, remove = stopwords(language = 'en'), stem = TRUE, valuetype = 'regex')
+dfm_nostem <- dfm_group(dfm_nostem, groups=company)
+
+sim_matrix('company', 2011, dfm_nostem)
+
+date_span <- function(x){
+  if (x < 2005){
+    return('1997-2004')
+  }
+  else if (x < 2011){
+    return('2005-2010')
+  }
+  else if (x > 2010){
+    return("2011-2019")
+  }
+}
+
+date_span1 <- function(x){
+  if (x < 2010){
+    return('1997-2009')
+  }
+  else if (x < 2012){
+    return('2010-2011')
+  }
+  else if (x > 2011){
+    return("2012-2019")
+  }
+}
+
+# crates dateframe of every company's cosine difference with its own past annual reports, from yeartocomp year.
+corp <- corpus(df, text_field = 'text')
+toks <- tokens(corp, remove_numbers = TRUE, remove_punc = TRUE, remove_symbols = TRUE, remove_separators = TRUE)
+toks <- tokens_remove(toks, pattern = '([^A-z])|(^[A-z]$)', valuetype = 'regex')
+toks <- tokens_remove(toks, pattern = 'xxxxxxxx', valuetype = 'regex')
+toks <- tokens_tolower(toks)
+#dfm_nostem <- dfm(toks, remove = stopwords(language = 'en'), stem = TRUE, valuetype = 'regex')
+dfm_nostem <- toks %>% 
+  dfm() %>%
+  dfm_remove(stopwords(language = 'en')) %>%
+  dfm_wordstem(language = 'en')
+#dfm_nostem <- dfm_group(dfm_nostem, groups=company)
+
+
+
+rm(dist_df)
+rm(plot_df)
+company_sim <- function(yeartocomp = 2019, dfm_use, tfidf=TRUE) {
+  for (i in unique(dfm_use@docvars$company)){
+    test_d <- dfm_subset(dfm_use, company == i)
+    if (sum(test_d@docvars$year == 2019) == 0) next
+    t <- dfm_group(test_d, groups = year)
+    if (tfidf) {
+      t <- dfm_tfidf(t)}
+    t_base <- dfm_subset(t, year == yeartocomp)
+    comp_sim <- textstat_simil(t, t_base)
+    dist_df <- as.tibble(cbind(comp_sim@Dimnames[[1]], as.vector(comp_sim@x)))
+    colnames(dist_df) <- c('Year', 'Cosine')
+    #colnames(dist_df) <- 'cosine'
+    Company <- t@docvars$company
+    #Year <- t@docvars$year
+    dist_df <- cbind(dist_df, Company)
+    dist_df['period'] <- sapply(dist_df$Year, date_span)
+    dist_df$period <- factor(dist_df$period, levels=c("1997-2004","2005-2010", "2011-2019"))
+    if (exists('plot_df') != TRUE){
+    #if (i == unique(dfm_use@docvars$company)[1]){
+      plot_df <- dist_df
+    }
+    else{
+      plot_df <- rbind(plot_df, dist_df)
+    }
+  }
+  plot_df$Cosine <- as.numeric(plot_df$Cosine)
+  return(plot_df)
+  ggplot(plot_df, aes(Year, cosine, group = Company, color = Company)) +
+    geom_point()+
+    geom_line(group=interaction(Company, period))+
+    geom_smooth(method = 'lm', se = FALSE)+
+    theme_bw()+
+    labs(y = expression(theta), title = 'Document Similarities Compared to 2018 Documents', 
+         subtitle = 'Cosine distance')
+}
+
+company_sim1 <- function(yeartocomp = 2019, dfm_use, tfidf=TRUE) {
+  for (i in unique(dfm_use@docvars$company)){
+    test_d <- dfm_subset(dfm_use, company == i)
+    if (sum(test_d@docvars$year == 2019) == 0) next
+    t <- dfm_group(test_d, groups = year)
+    if (tfidf) {
+      t <- dfm_tfidf(t)}
+    t_base <- dfm_subset(t, year == yeartocomp)
+    comp_sim <- textstat_simil(t, t_base)
+    dist_df <- as.tibble(cbind(comp_sim@Dimnames[[1]], as.vector(comp_sim@x)))
+    colnames(dist_df) <- c('Year', 'Cosine')
+    #colnames(dist_df) <- 'cosine'
+    Company <- t@docvars$company
+    #Year <- t@docvars$year
+    dist_df <- cbind(dist_df, Company)
+    dist_df['period'] <- sapply(dist_df$Year, date_span1)
+    dist_df$period <- factor(dist_df$period, levels=c("1997-2009", "2010-2011", "2012-2019"))
+    if (exists('plot_df') != TRUE){
+      #if (i == unique(dfm_use@docvars$company)[1]){
+      plot_df <- dist_df
+    }
+    else{
+      plot_df <- rbind(plot_df, dist_df)
+    }
+  }
+  plot_df$Cosine <- as.numeric(plot_df$Cosine)
+  return(plot_df)
+  ggplot(plot_df, aes(Year, cosine, group = Company, color = Company)) +
+    geom_point()+
+    geom_line(group=interaction(Company, period))+
+    geom_smooth(method = 'lm', se = FALSE)+
+    theme_bw()+
+    labs(y = expression(theta), title = 'Document Similarities Compared to 2018 Documents', 
+         subtitle = 'Cosine distance')
+}
+
+dfforplot <- company_sim(dfm_use = dfm_nostem)
+dfforplot1 <- company_sim1(dfm_use = dfm_nostem)
+
+
+## created plot using the the code in company_sim, then running the following for the
+## cosine distances with regression discontinuity
+dfforplot %>%
+  ggplot(aes(Year, Cosine, group=Company, color = Company)) +
+  geom_point()+
+  geom_line()+
+  geom_smooth(aes(x = Year, y = Cosine, group = period), method = 'lm', se = FALSE)+
+  theme_bw()+
+  #geom_vline(xintercept=2010, linetype="dashed") +
+  #geom_rect(xmin = 2004, xmax = 2005, ymin = -Inf, ymax = Inf, fill = NA, alpha = .3) +
+  #geom_rect(aes(xmin = 2010, xmax = 2011, ymin = -Inf, ymax = Inf), fill = 'salmon', alpha = .01) +
+  labs(y = expression(theta), title = 'Document Similarities Compared to 2018 Documents', 
+       subtitle = 'Cosine distance')
+
+# remove 2019 as this is distorting the reg line
+dfforplot %>%
+  filter(Year != 2019) %>%
+  #ggplot(aes(Year, Cosine, group=interaction(Company, period), color = Company)) +
+  ggplot(aes(Year, Cosine, group=Company, color = Company)) +
+  geom_point()+
+  geom_line()+
+  geom_smooth(aes(x = Year, y = Cosine, group = period), method = 'lm', se = FALSE)+
+  theme_bw()+
+  #geom_rect(xmin = 2004, xmax = 2005, ymin = -Inf, ymax = Inf, fill = NA, alpha = .3) +
+  #geom_rect(aes(xmin = 2010, xmax = 2011, ymin = -Inf, ymax = Inf), fill = 'salmon', alpha = .01) +
+  labs(y = expression(theta), title = 'Document Similarities Compared to 2019 Documents', 
+       subtitle = 'Cosine distance')
+  
+## these good plots, but probably not reg cont with so few points, better to just plot average rather than regression
+av <- dfforplot1 %>% 
+  group_by(Year) %>%
+  dplyr::summarize(Cosine = mean(Cosine)) %>%
+  mutate(Company = "Average")
+av['period'] <- sapply(av$Year, date_span1)
+dfforplot1 <- rbind(dfforplot1, av)
+
+dfforplot1 <- mutate(dfforplot1, Type = ifelse(Company == "Average", 1.25, 1))
+
+dfforplot1 <-dfforplot1 %>%
+  filter(Year != 2019) %>%
+  filter(Company != "Uniper")
+  #ggplot(aes(Year, Cosine, group=interaction(Company, period), color = Company)) +
+av <- av %>%
+  filter(Year != 2019) 
+
+library('wesanderson')
+
+# PLOT FOR COSINE DIFF PLOT IN EC ECONOMICS, NOT USED IN ENDE
+dfforplot1 %>%
+  filter(Company != "Uniper" & Year != 2019) %>%
+  ggplot() +
+  geom_point(aes(Year, Cosine, color = Company, shape = Company))+
+  geom_line(aes(Year, Cosine, group=Company, linetype = Company, color = Company, size = Company)) +
+  scale_size_manual(values = c(1,1,1,1,1)) +
+  scale_colour_manual(values = c("black", "red", "blue", "green", "purple")) +
+  #scale_colour_manual(values = c("black", wes_palette("Darjeeling1"))) +
+  scale_shape_manual(values = c(NA, 1:4)) +
+  #stat_summary(aes(Year, y = Cosine, group=1), fun=mean, colour="black", geom="line", size=1, group=1) +
+  #geom_line(aes(av$Year, av$rolling, group = av$Company), size=1.1, color = 'black') +
+  #geom_line(data = av, aes(Year, Cosine, group = Company, color = Company), size=1.1, color = 'black') +
+  #geom_smooth(aes(x = Year, y = Cosine, group = period), method = 'lm', se = FALSE)+
+  #geom_rect(xmin = 2004, xmax = 2005, ymin = -Inf, ymax = Inf, fill = NA, alpha = .3) +
+  #geom_rect(aes(xmin = 2010, xmax = 2011, ymin = -Inf, ymax = Inf), fill = 'salmon', alpha = .01) +
+  labs(y = "Cosine distance", x = 'Year') + # title = 'Document Similarities Compared to 2019 Documents', subtitle = 'Cosine distance',
+  #scale_color_discrete(name = "Company") +
+  theme_bw()
+
+## Rolling averages -- not really giving anything new, plus this is already an average, plus we care about sudden movements
+av['rolling'] <- zoo::rollmean(av$Cosine, 2, fill=av$Cosine, align = 'right')
+
+
+
+### Visualization, by year - each graph of company compared to others, cosine heat map table
+var <- 'company'
+graph <- 2017 
+dfm <- dfm
+year <- 2017
+
+cos_sim_matrix <- function(var, year, dfm=dfm) {
+  l <- sim_matrix(var, year, dfm)
+  if (nrow(l) !=5) {
+    m <- sim_matrix(var, 2018, dfm)
+    absent <- setdiff(colnames(m), colnames(l))
+    for (i in absent){
+      l <- rbind(l, rep(NA, ncol(l)))
+      rownames(l) <- c(rownames(l)[1:nrow(l)-1], i)
+      l <- l[order(rownames(l)),]
+      l <- cbind(l, rep(NA, nrow(l)))
+      colnames(l) <- c(colnames(l)[1:ncol(l)-1], i)
+      l <- l[,order(colnames(l))]
+    }
+  }
+  ma <- as.tibble(l[,])
+  ma['company'] <- rownames(l)
+  ma[lower.tri(ma, diag = TRUE)] <- NA
+  print(ma)
+  out <- mutate(ma, year = year)
+  print(out)
+  tot_gath <- gather(out, 1:as.integer(ncol(out)-2), key = 'to', value = 'cosine')
+  print(tot_gath)
+  g <- tot_gath %>%
+    filter(cosine < .99) %>%
+    ggplot(aes(company, to)) +
+    geom_tile(aes(fill = cosine)) +
+    scale_fill_continuous("",limits=c(.3, 1), breaks=seq(.3,1,by=0.2), low = "white", high = "green", na.value = "white") +
+    theme_bw() +
+    geom_text(aes(label = format(cosine, nsmall=2)), color = 'black') +
+    theme(axis.text.x=element_text(angle=90), axis.ticks=element_blank(), axis.line=element_blank(), panel.border=element_blank(),
+          panel.grid.major=element_line(color='#eeeeee')) +
+    labs(x = '', y = '', title = paste(year), subtitle = 'Cosine distances of company reports to investors')
+  return(g)
+}
+cos_sim_matrix('company', 2018, dfm)
+
+## for loop to print them all
+years <- 2003:2018
+for (i in years) {
+  print(cos_sim_matrix('company', i, dfm))
+}
+
+l <- sim_matrix('company', 2010, dfm)
+absent <- setdiff(colnames(m), colnames(l))
+for (i in absent){
+  l <- rbind(l, rep(NA, ncol(l)))
+  rownames(l) <- c(rownames(l)[1:nrow(l)-1], i)
+  l <- l[order(rownames(l)),]
+  l <- cbind(l, rep(NA, nrow(l)))
+  colnames(l) <- c(colnames(l)[1:ncol(l)-1], i)
+  l <- l[,order(colnames(l))]
+}
+
+
+m <- sim_matrix('year', 'RWE', dfm)
+ma <- as.tibble(m[,])
+ma['company'] <- rownames(m)
+ma[lower.tri(ma)] <- NA
+out <- mutate(ma, year = 2010)
+tot_gath <- gather(out, 1:as.integer(ncol(out)-2), key = 'to', value = 'cosine')
+
+# tot_gath %>%
+#     filter(cosine < .99) %>%
+#     ggplot(aes(company, cosine, group = to, color = to)) +
+#     ylim(.5,1) +
+#     geom_point() +
+#     geom_line()
+
+tot_gath %>%
+  filter(cosine < .99) %>%
+  ggplot(aes(company, to)) +
+  geom_tile(aes(fill = cosine)) +
+  scale_fill_continuous("",limits=c(.5, 1), breaks=seq(.5,1,by=0.2), low = "white", high = "brown", na.value = "white") +
+  theme_bw() +
+  geom_text(aes(label = format(cosine, nsmall=2)), color = 'black') +
+  theme(axis.text.x=element_text(angle=90), axis.ticks=element_blank(), axis.line=element_blank(), panel.border=element_blank(),
+        panel.grid.major=element_line(color='#eeeeee'))
+
+
+#########3 CO-OCCURENCE FREQUENCY #######
+## slightly changed version of plot_freq, to get relative frequency only of words in windows
+
+word_cofreq <- function(word_to_select){
+  # HERE SELECTING WINDOW -- if want
+  sel_toks <- tokens_select(toks, phrase(word_to_select), valuetype = 'regex', padding=F, window = 40)
+  ## Treating it
+  sel_toks <- tokens_remove(sel_toks, c(de_stop$word, word_to_select), valuetype = 'regex')
+  d <- dfm(sel_toks, stem = F)
+  plot_freq('period', d)
+}
+
+word_cofreq('risik[/w]*')
+word_cofreq('ausschÃÂ¼ttung')
+word_cofreq('aktionÃÂ¤re') #this a good chart
+word_cofreq('dogma[/w]*')
+word_cofreq('rein')
+word_cofreq('Eigentum')
+word_cofreq('Tageb')
+
+##### Keyness #########
+
+period <- ifelse(docvars(dfm, "year") < 2011, "pre-Fukushima", "post-Fukushima")
+dfm_periods <- dfm(dfm, groups = period)
+dfm_periods@Dimnames$docs # post-Fukushima in first row
+head(tstat1 <- textstat_keyness(dfm_periods), 100)
+tail(tstat1, 40)
+
+head(tstat2 <- textstat_keyness(dfm_smooth(dfm_periods), measure = "lr", target = "post-Fukushima"), 30)
+
+filter(tstat1, str_detect(feature, 'div'))
+filter(tstat2, str_detect(feature, 'kapital'))
+filter(tstat1, str_detect(feature, 'gas'))

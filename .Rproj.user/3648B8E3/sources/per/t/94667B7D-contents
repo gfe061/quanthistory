@@ -1,0 +1,958 @@
+library(readxl)
+library(plyr)
+library(tidyverse)
+library(ggplot2)
+library(latex2exp)
+library(gridExtra)
+library(latex2exp)
+# for linux directory
+#setwd("~/pCloudDrive/Work/Projects/Elektritizitätswirtschaft/Geschäftsberichte")
+# for windows
+setwd("P:/Work/Projects/Elektritizitätswirtschaft/Geschäftsberichte")
+#options(OutDec= ".")
+#folders <- list.files()
+#path <- paste0(folders[6], '/xls Dateien')
+#xl_folder <- list.files(path)
+
+#excel_sheets(paste0(path, '/', xl_folder[4]))
+excel_sheets("consolidatedfinances_DE.xls")
+RWE <- mutate(read_excel("consolidatedfinances_DE.xls", 1, col_names = T, col_types = c('text', 'text', rep('numeric', 23))), company = 'RWE')
+Vattenfall <- mutate(read_excel("consolidatedfinances_DE.xls", 2, col_names = T, col_types = c('text', 'text', rep('numeric', 24))), company = 'Vattenfall')
+EnBW <- mutate(read_excel("consolidatedfinances_DE.xls", 3, col_names = T, col_types = c('text', 'text', rep('numeric', 24))), company = 'EnBW')
+EoN <- mutate(read_excel("consolidatedfinances_DE.xls", 4, col_names = T, col_types = c('text', 'text', rep('numeric', 22))), company = 'EON')
+Uniper <- mutate(read_excel("consolidatedfinances_DE.xls", 5, col_names = T, col_types = c('text', 'text', rep('numeric', 5))), company = 'Uniper')
+innogy <- mutate(read_excel("consolidatedfinances_DE.xls", 6, col_names = T, col_types = c('text', 'text', rep('numeric', 3))), company = 'innogy')
+
+# messing with locale to get ',' as decimal separator -- didn't work
+#Sys.setlocale("LC_ALL","de_DE.utf8")
+#LANGUAGE="de_DE.utf8"
+#Sys.setenv("LANGUAGE"="DE")
+
+## # converting SEK->EUR based on a fx rates in row of Vattenfall df, copied from: 
+# https://www.ofx.com/en-us/forex-news/historical-exchange-rates/
+
+SEK_rnum <- grep('SEK', Vattenfall$Unit)
+fx_rate <- grep('SEKtoEUR', Vattenfall$Variable)
+for (i in SEK_rnum){
+  Vattenfall[i, 4:ncol(Vattenfall)-1] <- Vattenfall[i, 4:ncol(Vattenfall)-1] * Vattenfall[fx_rate, 4:ncol(Vattenfall)-1]
+}
+
+
+# putting all together in one big and messy df
+x <- bind_rows(RWE, EnBW, Vattenfall, EoN, Uniper, innogy)
+#x <- rbind.fill(RWE, EnBW, Vattenfall, EoN, Uniper, innogy)
+
+
+# DF saved of all balance sheets
+saveRDS(x, 'Bilanz_jan2021')
+
+############
+## START FROM HERE : DF for load
+#x <- readRDS('Bilanz_feb2020')
+x <- readRDS('Bilanz_jan2021')
+############
+
+
+# Simple graphs
+
+## FIGURE X: ECOLOGICAL ECONOMICS SUBMIT
+# SIZE: 957x500
+ebitda <- grep("EBITDA", x$Variable)
+(p_ebitda <- x[ebitda,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1997:2019), key = 'year', value = 'EBITDA') %>%
+  filter(company != 'innogy' & company != 'Uniper') %>%
+  ggplot(aes(year, EBITDA)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(group = company, color = company, linetype = company)) +
+  geom_point(aes(shape = company, color = company, shape = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Million €', #title = 'Adjusted Earnings before interest, tax, depreciation, and amortization (EBITDA)'
+       ) +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10)))
+
+## FIGURE 3: ECOLOGICAL ECONOMICS SUBMIT
+# SIZE: 957x500
+comp <- grep("Salary: CEO", x$Variable)
+(comp_plot <- x[comp,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1997:2019), key = 'year', value = 'comp') %>%
+  mutate(comp = comp/1000) %>%
+  ggplot(aes(year, comp)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(group = company, color = company, linetype = company)) +
+  geom_point(aes(shape = company, color = company, shape = company)) +
+  theme_bw() +
+  scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+          legend.text=element_text(size=10)) +
+  labs(x = 'Year', y = "Million €")#, title = 'CEO Compensation') +
+)
+
+emp <- grep("Employees", x$Variable)
+(emp_plot <- x[emp,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1997:2019), key = 'year', value = 'Employees') %>%
+  mutate(Employees = Employees/1000) %>%
+  ggplot(aes(year, Employees)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(group = company, color = company, linetype = company)) +
+  geom_point(aes(shape = company, color = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = "Thousands of employees", 
+       #title = 'Workforce'
+       ) +
+  scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10))
+)
+
+grid.arrange(emp_plot, comp_plot, nrow = 1)
+
+profits <- grep("Nettoergebnis inkl", x$Variable)
+x[profits,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1997:2019), key = 'year', value = 'Employees') %>%
+  mutate(Employees = Employees/1000) %>%
+  ggplot(aes(year, Employees)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(shape = company, color = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = "Million €", 
+       title = 'Net Profits/Loss') +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10))
+
+profits <- grep("Nettoergebnis inkl. Firmenwert-Abschreibungen", x$Variable)
+x[profits,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1997:2019), key = 'year', value = 'Employees') %>%
+  mutate(Employees = Employees/1000) %>%
+  ggplot(aes(year, Employees)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(shape = company, color = company)) +
+  theme_bw() +
+  scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+  labs(x = 'Year', y = "Million €", 
+       title = 'Net Profits/Loss') +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10))
+
+## FIGURE 7: ECOLOGICAL ECONOMICS SUBMIT
+co2 <- grep("CO2 Emissions", x$Variable)
+totco2 <- x[co2,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1996:2019), key = 'year', value = 'CO2') %>%
+  ggplot(aes(year, CO2)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(shape = company, color = company)) +
+  theme_bw() +
+  scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+  labs(x = 'Year', y = TeX("Million tons CO$_2$")) + # title = TeX("Direct $CO_2$ Emissions"), subtitle = 'Scope 1'
+  scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10))
+
+# co2 per mwh produced
+co2 <- grep("CO2 Emissions", x$Variable)
+x_co2 <- x[co2,] %>%
+  gather(as.character(1996:2019), key = 'year', value = 'CO2') %>%
+  unite(key, company, year)
+tot_prod <- grep("Production: Total", x$Variable)
+x_prod <- x[tot_prod,] %>%
+  gather(as.character(1996:2019), key = 'year', value = 'Production') %>%
+  unite(key, company, year)
+intensity <- full_join(x_co2, x_prod, by = 'key') %>%
+  select(key, CO2, Production) %>%
+  separate(key, into = c("Company", 'Year'), sep = '_') %>%
+  mutate(Intensity = CO2/Production) %>%
+  #x_co2$prod <- x_prod$Production 
+  ggplot(aes(Year, Intensity)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(group = Company, color = Company, linetype = Company)) +
+  geom_point(aes(shape = Company, color = Company)) +
+  theme_bw() +
+  scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+  labs(x = 'Year', y = TeX("Million tons CO$_2$ per terrawatt hour (TWh)"), 
+       #title = TeX("Direct $CO_2$ Emissions Intensity"), subtitle = 'Scope 1'
+       ) +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10))
+
+grid.arrange(totco2,intensity, nrow = 1)
+
+provs <- grep("Provisions", x$Variable)
+x[provs,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1997:2019), key = 'year', value = 'EBITDA') %>%
+  ggplot(aes(year, EBITDA)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(color = company, group = company)) +
+  geom_point(aes(shape = company, color = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Million €', 
+       title = 'Accounting Provisions of Major German Electricity Utilities') +
+  guides(linetype=guide_legend(nrow = 1, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10))
+
+finshuld <- grep("Nettofinanzschulden", x$Variable)
+x[finshuld,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1997:2019), key = 'year', value = 'EBITDA') %>%
+  ggplot(aes(year, EBITDA)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(color = company, group = company)) +
+  geom_point(aes(shape = company, color = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Million €', 
+       title = 'Net Financial Debt of Major German Electricity Utilities') +
+  guides(linetype=guide_legend(nrow = 1, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10))
+
+
+
+## area map of net debt
+trans_netfindebt <- function(x){
+  if (x == 'Nettofinanzschulden'){
+    trans <- 'Net financial debt'
+  }
+  else {trans <- x}
+  return(trans)
+}
+
+trans_netdebt <- function(x){
+  if (str_detect(x, 'Nettoschulden')){
+    trans <- 'Net debt'
+  }
+  else {trans <- x}
+  return(trans)
+}
+
+nettoschuld <- grep("Nettoschulden", x$Variable)
+prov_fin <- c(provs, finshuld)
+prov_fin <- c(provs, nettoschuld)
+provfin <- x[prov_fin, ] %>%
+  gather(as.character(2019:1996), key = 'year', value = 'value') %>%
+  #filter(Erzeugung < 150) %>%
+  #separate(Variable, into=c('Prod', 'Source'), sep = ': ') %>%
+  mutate(Year = as.numeric(year))
+#provfin$Variable_en <- sapply(provfin$Variable, trans_netfindebt)
+provfin$Variable_en <- sapply(provfin$Variable, trans_netdebt)
+provfin %>%
+  filter(company != "innogy" & company != "Uniper") %>%
+  ggplot(aes(Year, value)) +
+  geom_area(aes(fill = Variable_en, group = Variable_en)) +
+  #geom_point(aes(color = Variable)) +
+  scale_x_continuous(limits = c(1996, 2019), breaks = seq(1996,2019,2)) +
+  facet_wrap(~ company, nrow = 2) +
+  ylim(-8000,NA) +
+  theme_minimal() +
+  labs(x = 'Year', y = 'Mio. €', 
+       title = 'Net Debt') +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10), axis.text.x = element_text(angle = 0)) +
+  guides(colour = guide_legend(nrow = 2))
+
+schuld <- grep('^Nettoschuld', x$Variable)
+x[schuld,] %>%
+  #mutate()
+  gather(as.character(1997:2018), key = 'year', value = 'Nettoschuld') %>%
+  ggplot(aes(year, Nettoschuld)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(colour = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Net debt', 
+       title = 'Net Debt of Major German Electricity Utilities', subtitle = "In million €")
+
+eigenkap <- grep("Bilanzielles Eigenkapital", x$Variable)
+x[eigenkap,] %>%
+  gather(as.character(1997:2019), key = 'year', value = 'Eigenkapital') %>%
+  ggplot(aes(year, Eigenkapital)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(colour = company)) +
+  theme_bw() +
+  labs(x = 'Year', title = 'Eigenkapital on Big Utility Balance Sheets', subtitle = "In million €")
+
+# we can calculate verschuldungsfaktor
+x_schuld <- x[schuld,] %>%
+  #mutate()
+  gather(as.character(1997:2018), key = 'year', value = 'Nettoschuld')
+x_EBITDA <- x[ebitda,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'EBITDA')
+x_schuld$EBITDA <- x_EBITDA$EBITDA
+x_schuld %>%
+  mutate(Verschuldfatk = Nettoschuld/EBITDA) %>%
+  ggplot(aes(year, Verschuldfatk)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(colour = company, shape = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Ratio of net debt to EBITDA', 
+       title = 'Debt factor of Major German Electricity Utilities', subtitle = "In million €")
+# same thing, computed in excel and just graphed from spreadsheet
+verschfakt <- grep('Verschuldungsfaktor', x$Variable)
+(vershfakt_plot <- x[verschfakt,] %>%
+  gather(as.character(1997:2019), key = 'year', value = 'Verschuldfakt') %>%
+  filter(company != "innogy" & company != "Uniper") %>%
+  ggplot(aes(year, Verschuldfakt)) +
+  geom_line(aes(group = company, color = company, linetype = company)) +
+  geom_point(aes(colour = company, shape = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = TeX('$\\frac{Net\\; debt}{EBITDA}$') 
+       #, title = 'Debt factor of Major German Electricity Utilities', subtitle = "In million €"
+       ) +
+  scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+          legend.text=element_text(size=10))
+  )
+
+ebit <- grep("EBIT/Betriebliches Ergebnis", x$Variable)
+ebit_plot <- x[ebit,] %>%
+  #rownum <- eigenkap[x$company[eigenkap] == 'Vattenfall'] %>%
+  #x[rownum,] <- c(x[rownum,1:2], x[rownum,3:25]*x[ex_rnum, 3:25], x[rownum, 26:27]) %>%
+  gather(as.character(1997:2019), key = 'year', value = 'ebit') %>%
+  mutate(ebit = ebit/1000) %>%
+  filter(company != "Uniper" & company != "innogy") %>%
+  ggplot(aes(year, ebit)) +
+  #geom_line(aes(linetype = company, group = company)) +
+  geom_line(aes(group = company, color = company, linetype = company)) +
+  geom_point(aes(shape = company, color = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = "Million €", 
+       #title = 'Net Profits/Loss'
+  ) +
+  scale_x_discrete(breaks = seq(1997, 2019, 2)) +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch")) +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10))
+
+## FIGURE X: EC ECONOMICS SUBMIT
+# SIZE: 1300x500
+grid.arrange(ebit_plot,vershfakt_plot, nrow = 1)
+
+bilanz <- grep("^Bilanzsumme", x$Variable)
+x[bilanz,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'Balance') %>%
+  ggplot(aes(year, Balance)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(colour = company))
+
+### FIGURE 1 in MPIfG Discussion Paper####
+#x <- mutate(x, key = row_number())
+co2 <- grep("CO2-Ausstoß: Total", x$Variable)
+x_co2 <- x[co2,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'CO_2')
+  filter(company != 'innogy') %>% # because in legend but not plotted, confusing
+  # becouse gathering as characters because they are char when column names
+  #filter(is.na(CO_2) != T)
+erzeug <- grep("Erzeugung: Total", x$Variable)  
+x_erzeug <- x[erzeug,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'Erzeugung') %>%
+  filter(company != 'innogy')
+x_co2$Erzeugung <- x_erzeug$Erzeugung
+x_co2 <- x_co2 %>% 
+  mutate(Company = company)
+
+#jpeg('Fig1.jpeg', units="in", width=7.94, height=4.42, res=600)
+#tiff('Fig1.tiff', units="in", width=7.94, height=4.42, res=600)
+pdf('Fig1.pdf', width = 8, height = 4.5)
+x_co2 %>%
+  mutate(coer = CO_2/Erzeugung) %>%
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, coer)) +
+  geom_line(aes(group = Company, linetype = Company)) + #color = company,
+  #geom_point(aes(colour = company)) +
+  #geom_smooth(method = 'lm', na.rm = F, fullrange = F) +
+  scale_x_continuous(limits = c(2007,2018), breaks = 2007:2018)+
+  #xlim(2007, 2019) +
+  #scale_colour_grey() +
+  #scale_linetype_manual(values=linetypes) +
+  theme_bw() +
+  labs(x = 'Year', y = TeX('$\\frac{Tons \\, CO_2}{MWh}$'),
+       title = TeX('$CO_2$ Intensity'), subtitle = TeX("In tons of direct $CO_2$ emissions per megawatt hour (MWh)"))
+dev.off()
+
+## Dividents and Ausschuetung
+aus <- grep("Ausschüttung", x$Variable)
+x[aus,] %>%
+  gather(as.character(1997:2019), key = 'year', value = 'dpayouts') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, dpayouts)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(colour = company)) +
+  scale_x_continuous(limits = c(1999,2018), breaks = 1999:2018) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Payouts',
+       title = 'Divident payouts', subtitle = "In million €")
+
+## FIGURE 5: ECOLOGICAL ECONOMICS SUBMIT
+## Calculate Ausschuetung to Nettoergebnis ##
+x_aus <- x[aus,] %>%
+  #mutate()
+  gather(as.character(1997:2019), key = 'year', value = 'dpayouts')
+nettoerg <- grep('^Nettoergebnis', x$Variable) 
+x_netto <- x[nettoerg,] %>%
+  gather(as.character(1997:2019), key = 'year', value = 'nettoerg')
+# putting these two values into on df
+x_aus$nettoerg <- x_netto$nettoerg
+bluezone <- data.frame(xmin=-Inf, xmax=Inf, ymin=.3, ymax=.5)
+x_aus %>%
+  mutate(ratio = dpayouts/nettoerg) %>%
+  mutate(Year = as.numeric(year)) %>%
+  filter(company != 'innogy' & company != 'Uniper') %>%
+  ggplot(aes(Year, ratio)) +
+  geom_line(aes(group = company, color = company, linetype = company)) +
+  scale_x_continuous(limits = c(1999,2019), breaks = seq(1999,2019,2)) +
+  geom_hline(yintercept=0, color = 'black', size = 1.5, alpha=.3, linetype = 'dashed') +
+  #geom_hline(yintercept=.8, color = 'black', size = 1.5, alpha=.3, linetype = 'dashed') +
+  geom_rect(data=bluezone, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color="transparent", fill="grey30", alpha=0.1,inherit.aes = FALSE) +
+  scale_y_continuous(limits = c(-1.1,2), breaks = seq(-2,2,1)) +
+  geom_point(aes(colour = company, shape = company)) +
+  theme_bw() +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10), axis.text.x = element_text(angle = 0)) +
+  guides(colour = guide_legend(nrow = 2)) +
+  labs(x = 'Year', y = TeX('$\\frac{Divident\\;Payouts}{Profits}$'))#, title = 'Divident Payouts as Ratio of Net Profts of Major German Electricity Utilities')
+
+# Calculate Ausschuetung to Eigenkap
+eigenkap <- grep('^Bilanzielles Eigenkapital', x$Variable) 
+x_eigen <- x[eigenkap,] %>%
+  gather(as.character(1997:2019), key = 'year', value = 'eigenkap')
+# putting these two values into on df
+x_aus$eigenkap <- x_eigen$eigenkap
+x_aus %>%
+  mutate(ratio = dpayouts/eigenkap) %>%
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, ratio)) +
+  geom_line(aes(group = company, color = company)) +
+  scale_x_continuous(limits = c(1999,2018), breaks = seq(1999,2018,2)) +
+  geom_point(aes(colour = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = TeX('$\\frac{Dividend\\;Payouts}{Shareholder\\; Equity}$'))#, 
+#       title = 'Divident Payouts as Ratio of Net Shareholder Equity of Major German Electricity Utilities')
+
+# Calculate Ausschuetung to EBIT
+ebit <- grep('^EBIT/', x$Variable) 
+x_ebit <- x[ebit,] %>%
+  gather(as.character(1997:2019), key = 'year', value = 'ebit')
+# putting these two values into on df
+x_aus$ebit <- x_ebit$ebit
+x_aus %>%
+  mutate(ratio = dpayouts/ebit) %>%
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, ratio)) +
+  geom_line(aes(group = company, color = company)) +
+  scale_x_continuous(limits = c(1999,2018), breaks = seq(1999,2018,2)) +
+  geom_point(aes(colour = company)) +
+  ylim(0,2) +
+  theme_bw() +
+  labs(x = 'Year', y = TeX('$\\frac{Dividend\\;Payouts}{EBIT}$'), 
+       title = 'Divident Payouts as Ratio of EBIT of Major German Electricity Utilities')
+
+# Market caps
+marketcap <- grep('rsenkap', x$Variable)
+enbw_marketcap <- x[marketcap,] %>%
+  gather(as.character(1997:2019), key = 'year', value = 'marketcap') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(Year = as.numeric(year)) %>%
+  filter(company == 'EnBW') %>%
+  mutate (marketcap = as.numeric(marketcap)) %>%
+  mutate(marketcap = marketcap/1000)
+tot_marketcap <- x[marketcap,] %>%
+  gather(as.character(1997:2019), key = 'year', value = 'marketcap') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(marketcap = as.numeric(marketcap)) %>%
+  mutate(Year = as.numeric(year)) %>%
+  filter(company != 'EnBW')
+mcap <- rbind(enbw_marketcap, tot_marketcap)
+mcap %>%
+  ggplot(aes(Year, marketcap)) +
+  geom_line(aes(group = company, color = company)) +
+  geom_point(aes(colour = company)) +
+  scale_x_continuous(limits = c(1999,2018), breaks = 1999:2018) +
+  theme_bw() +
+  labs(x = 'Year', y = 'In million €',
+       title = 'Total Market Capitalization', subtitle = "")
+
+## Visualize ownership
+EnBW <- filter(x, company == 'EnBW')
+owner_enbw <- grep('---', EnBW$Variable)
+EnBW[owner_enbw,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'Ownership') %>%
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Ownership), group = Variable) +
+  geom_col(aes(fill = Variable), position = position_stack()) + #group = Ownership, color = Ownership))
+  scale_x_continuous(breaks = seq(2012,2018,1)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Share Ownership', 
+       title = 'Share Ownership of EnBW', subtitle = 'As a %') +
+  theme(legend.position = 'bottom', legend.title = element_blank())
+
+trans_akt_rwe <- function(x){
+  if (x == 'Ownership: Belegschaftsaktionäre'){
+    trans <- 'Employee shares'
+  }
+  else if (x == 'Ownership: Institutionelle Aktionäre: DE'){
+    trans <- 'Institutional: Germany'
+  }
+  else if (x == 'Ownership: Institutionelle Aktionäre: Kontinentaleuropa ohne DE'){
+    trans <- 'Institutional: Continental Europe (not DE)'
+  }
+  else if (x == 'Ownership: Institutionelle Aktionäre: UK/Irland'){
+    trans <- 'Institutional: UK/Ireland'
+  }
+  else if (x == 'Ownership: Sonstige kommunale Aktionäre'){
+    trans <- 'Other municipal actors'
+  }
+  else if (x == 'Ownership: Eigene Aktien'){
+    trans <- 'Own shares'
+  }
+  else if (x == 'Ownership: Institutionelle Aktionäre: Kanada/USA'){
+    trans <- 'Institutional: Canada/USA'
+  }
+  else if (x == 'Ownership: Institutionelle Aktionäre: Sonstige Länder'){
+    trans <- 'Institutional: Other countries'
+  }
+  else if (x == 'Ownership: Privataktionäre'){
+    trans <- 'Private'
+  }
+  else {trans <- x}
+  return(trans)
+}
+trans_akt_rwe('Ownership: Sonstige kommunale Aktionäre')
+
+
+######### FIG 4 of MPI paper ############3
+#RWE <- mutate(read_excel("consolidatedfinances_DE.xls", 1, col_names = T, col_types = c('text', 'text', rep('numeric', 23))), company = 'RWE')
+RWE <- filter(x, company == 'RWE')
+owner <- grep('Ownership: ', RWE$Variable)
+#Variable_en <- lapply(RWE$Variable, trans_akt_rwe)
+r <- RWE[owner,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'Ownership') %>%
+  mutate(Year = as.numeric(year))
+r$Variable_en <- sapply(r$Variable, trans_akt_rwe)
+table(r$Variable_en)
+(plot1 <- r %>%
+  ggplot(aes(Year, Ownership), group = Variable_en) +
+  geom_col(aes(fill = Variable_en), position = position_stack()) + #group = Ownership, color = Ownership))
+  scale_x_continuous(breaks = seq(2004,2018,2)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Share Ownership', 
+       title = 'Share Ownership of RWE', subtitle = 'As a %') +
+  theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank()) +
+  theme(legend.text=element_text(size=9)) +
+  theme(axis.text.x=element_text(angle=30, hjust=.5, vjust = .5)) +
+  scale_colour_grey() +
+  guides(fill=guide_legend(nrow=2,byrow=TRUE)))
+
+own <- grep('--- ', RWE$Variable)
+(plot2 <- RWE[own,] %>%
+    gather(as.character(1997:2018), key = 'year', value = 'Ownership') %>%
+    # becouse gathering as characters because they are char when column names
+    mutate(Year = as.numeric(year)) %>%
+    mutate(Variable_en = str_remove(Variable, '--- ')) %>%
+    ggplot(aes(Year, Ownership)) +
+    geom_col(aes(color = Variable_en, fill = Variable_en)) + #group = Ownership, color = Ownership)) +
+    #geom_point(aes(color = Variable)) +
+    scale_x_continuous(breaks = seq(2006,2018,2)) +
+    theme_bw() +
+    labs(x = 'Year', y = '', 
+         title = 'Share Ownership of RWE by Holding', subtitle = 'As a %') +
+    theme(legend.position = 'bottom', legend.direction = 'horizontal', legend.title = element_blank()) +
+    theme(legend.text=element_text(size=9)) +
+    theme(axis.text.x=element_text(angle=30, hjust=.5, vjust = .5)) +
+    guides(fill=guide_legend(nrow=3,byrow=TRUE)))
+
+pdf('Fig3.pdf', width = 8, height = 4.5)
+grid.arrange(plot1, plot2, ncol = 2) #then sized this manually through 'Export' and saved as .svg
+dev.off()
+
+RWE[owner,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'Ownership') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Ownership)) +
+  geom_line(aes(color = Variable, group = Variable)) + #group = Ownership, color = Ownership)) +
+  xlim(2004, 2018)
+
+l <- RWE[own,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'Ownership') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(Year = as.numeric(year))
+table(l$Variable)
+
+
+
+
+EON <- filter(x, company == 'EON')
+own <- grep('Ownership', EON$Variable)
+EON[own,] %>%
+  gather(as.character(2003:2018), key = 'year', value = 'Ownership') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Ownership)) +
+  geom_col(aes(color = Variable, fill = Variable), position='stack') + #group = Ownership, color = Ownership)) +
+  #geom_point(aes(color = Variable)) +
+  xlim(2011, 2019)
+
+EON[own,] %>%
+  gather(as.character(2003:2018), key = 'year', value = 'Ownership') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Ownership)) +
+  geom_line(aes(color = Variable, group = Variable)) +
+  geom_point(aes(color = Variable)) +
+  xlim(2011, 2019)
+
+
+
+## Visualize Anleihen og Verbindlichkeiten
+
+######### FIG 4 of MPI paper #########3
+library(grid)
+RWE <- filter(x, company == 'RWE')
+financing <- c(grep('Anleihen', RWE$Variable), grep('Verbindlichkeiten', RWE$Variable)) 
+plot5 <- RWE[financing, ] %>%
+  gather(as.character(2000:2019), key = 'year', value = 'Financing') %>%
+  mutate(Year = as.numeric(year))
+  # becouse gathering as characters because they are char when column names
+  #mutate(Year = as.numeric(year)) %>%
+cairo_pdf('Fig4.pdf', width = 8, height = 4.5)
+plot5 %>%
+  ggplot(aes(Year, Financing)) +
+  geom_line(aes(linetype = Variable, group = Variable)) +
+  scale_x_continuous(limits = c(2000,2019), breaks = seq(2000,2019,2)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Mill. €', 
+       title = 'Financing of RWE') +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10)) +
+  guides(linetype=guide_legend(nrow = 2, keywidth=1, keyheight=0.3, default.unit="inch"))
+  #guides(linetype = guide_legend(nrow = 2))
+  #theme(legend.key.width = unit(2,"cm"))
+dev.off()
+
+financing_enbw <- c(grep('Anleihen', EnBW$Variable), grep('Verbindlichkeiten g', EnBW$Variable), grep('Commercial', EnBW$Variable))
+EnBW[financing_enbw, ] %>%
+  gather(as.character(2001:2018), key = 'year', value = 'Financing') %>%
+  mutate(Year = as.numeric(year)) %>%
+  # becouse gathering as characters because they are char when column names
+  #mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Financing)) +
+  geom_line(aes(color = Variable, group = Variable)) +
+  geom_point(aes(color = Variable)) +
+  scale_x_continuous(limits = c(2001,2017), breaks = seq(2001,2018,2)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Mill. €', 
+       title = 'Financing of EnBW')
+
+financing_eon <- c(grep('Anleihen', EoN$Variable), grep('Verbindlichkeiten g', EoN$Variable), grep('Commercial', EoN$Variable))
+EoN[financing_eon, ] %>%
+  gather(as.character(1999:2019), key = 'year', value = 'Financing') %>%
+  mutate(Year = as.numeric(year)) %>%
+  # becouse gathering as characters because they are char when column names
+  #mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Financing)) +
+  geom_line(aes(color = Variable, group = Variable)) +
+  geom_point(aes(color = Variable)) +
+  scale_x_continuous(limits = c(1999,2017), breaks = seq(1999,2019,2)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Mill. €', 
+       title = 'Financing of E.ON')
+
+financing_vattenfall <- c(grep('Anleihen', Vattenfall$Variable), grep('Verbindlichkeiten g', Vattenfall$Variable), grep('Commercial', EnBW$Variable))
+Vattenfall[financing_vattenfall, ] %>%
+  gather(as.character(2001:2018), key = 'year', value = 'Financing') %>%
+  mutate(Year = as.numeric(year)) %>%
+  # becouse gathering as characters because they are char when column names
+  #mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Financing)) +
+  geom_line(aes(color = Variable, group = Variable)) +
+  geom_point(aes(color = Variable)) +
+  scale_x_continuous(limits = c(2001,2017), breaks = seq(2001,2018,2)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Mill. €', 
+       title = 'Financing of EnBW')
+
+
+invest <- grep('^Investitionen,', x$Variable)
+x[invest,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'invest') %>%
+  mutate(Year = as.numeric(year)) %>%
+  group_by(company, Year) %>%
+  summarize(Investments = sum(invest)) %>%
+  ggplot(aes(Year, Investments)) +
+  geom_line(aes(group = company, color = company)) +
+  scale_x_continuous(limits = c(2008,2018), breaks = seq(2008,2018,1)) +
+  geom_point(aes(colour = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Investments', 
+       title = 'Investments in Renewable Energy of Major German Electricity Utilities', subtitle = 'In million €')
+
+invest_ee <- grep('^Adjusted EBIDTA, erneuerbar energien', x$Variable)
+x[invest_ee,] %>%
+  gather(as.character(1997:2018), key = 'year', value = 'invest') %>%
+  mutate(Year = as.numeric(year)) %>%
+  group_by(company, Year) %>%
+  summarize(Investments = sum(invest)) %>%
+  ggplot(aes(Year, Investments)) +
+  geom_line(aes(group = company, color = company)) +
+  scale_x_continuous(limits = c(2008,2018), breaks = seq(2008,2018,1)) +
+  geom_point(aes(colour = company)) +
+  theme_bw() +
+  labs(x = 'Year', y = 'EBIDTA',
+       title = 'EBIDTA from Renewables', subtitle = 'In million €')
+
+## Erzeugung
+EnBW <- filter(x, company == 'EnBW')
+erzeug_enbw <- grep('Production: ', EnBW$Variable)
+EnBW[erzeug_enbw, ] %>%
+  gather(as.character(2001:2018), key = 'year', value = 'Erzeugung') %>%
+  filter(Erzeugung > 2000) %>%
+  mutate(Year = as.numeric(year)) %>%
+  # becouse gathering as characters because they are char when column names
+  #mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Erzeugung)) +
+  geom_line(aes(color = Variable, group = Variable)) +
+  geom_point(aes(color = Variable)) +
+  scale_x_continuous(limits = c(2012,2017), breaks = seq(2012,2018,1)) +
+  ylim(0,NA) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Gigawatt hours (Gwh)', 
+       title = 'EnBW', subtitle = 'Generation Mix') +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10)) +
+  guides(colour = guide_legend(nrow = 2))
+
+
+######## FIGURE 2 for MPI DIscussion Papre #########3
+#RWE <- mutate(read_excel("consolidatedfinances_DE.xls", 1, col_names = T, col_types = c('text', 'text', rep('numeric', 23))), company = 'RWE')
+RWE <- filter(RWE, company == 'RWE')
+erzeug_rwe <- grep('Erzeugung:', RWE$Variable)
+plot2 <- RWE[erzeug_rwe, ] %>%
+  gather(as.character(2001:2018), key = 'year', value = 'Erzeugung') %>%
+  # filter(Erzeugung > 3000) %>%
+  filter(Erzeugung < 150) %>%
+  mutate(Year = as.numeric(year)) %>%
+  mutate(Variable1 = str_remove(Variable, 'Erzeugung: '))
+  # becouse gathering as characters because they are char when column names
+  #mutate(Year = as.numeric(year)) %>%
+pdf('Fig2.pdf', width = 8, height = 4.5)
+plot2 %>%
+  ggplot(aes(Year, Erzeugung)) +
+  geom_line(aes(linetype = Variable1, group = Variable1, linetype = Variable1)) +
+  #geom_point(aes(color = Variable1)) +
+  scale_x_continuous(limits = c(2007, 2018), breaks = seq(2007,2018,1)) +
+  ylim(0,NA) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Thousands of Gigawatt hours (Gwh)', 
+       title = 'RWE', subtitle = 'Generation Mix') +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10)) +
+  guides(colour = guide_legend(nrow = 2))
+dev.off()
+  
+  
+erzeug_eon <- grep('Production: [^T]', EoN$Variable)
+# Condensing different kinds of coal into one label
+coal_eon <- grep('([Cc]oal)|([Ll]ignite)', EoN$Variable)
+# this adds three coal rows and condenses into just one
+col_eon <- add_column(EoN[coal_eon, ][1:length(coal_eon),] %>% summarise_at(vars(as.character(2019:2003)), sum, na.rm = TRUE), Variable = 'Production: Coal', Unit = 'TWh', .before='2018')
+#col_eon <- add_column(col, company = 'EON')
+eon_genmix <- rbind(EoN[setdiff(erzeug_eon, coal), ], col) %>%
+  gather(as.character(2003:2019), key = 'year', value = 'Erzeugung') %>%
+  # filter(Erzeugung > 3000) %>%
+  filter(Erzeugung < 150) %>%
+  separate(Variable, into=c('Prod', 'Source'), sep = ': ') %>%
+  mutate(Year = as.numeric(year))
+
+eon_genmix  %>%
+  # becouse gathering as characters because they are char when column names
+  #mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Erzeugung)) +
+  geom_col(aes(fill = Source, group = Source)) +
+  #geom_point(aes(color = Variable)) +
+  scale_x_continuous(limits = c(2007.5, 2019.5), breaks = seq(2008,2019,1)) +
+  ylim(0,NA) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Thousands of Gigawatt hours (Gwh)', 
+       title = 'E.ON', subtitle = 'Generation Mix') +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10)) +
+  guides(colour = guide_legend(nrow = 2))
+
+erzeug_enbw <- grep('Production: [^T]', EnBW$Variable)
+enbw_genmix <- EnBW[erzeug_enbw,] %>%
+  gather(as.character(2000:2019), key = 'year', value = 'Erzeugung')
+
+# erzeug_eon <- grep('Production: [^Tt]', EoN$Variable)
+# # Condensing different kinds of coal into one label
+# coal_eon <- grep('([Cc]oal)|([Ll]ignite)', EoN$Variable)
+# # this adds three coal rows and condenses into just one
+# col_eon <- add_column(EoN[coal_eon, ][1:length(coal_eon),] %>% summarise_at(vars(as.character(2019:2003)), sum, na.rm = TRUE), Variable = 'Production: Coal', Unit = 'TWh', .before='2018')
+# #col_eon <- add_column(col, company = 'EON')
+# eon_genmix <- rbind(EoN[setdiff(erzeug_eon, coal), ], col)
+
+## FIGURE 4: ECOLOGICAL ECONOMICS SUBMIT
+## Nice table of generation mixes of all Big 4 put together
+erzeug <- grep('Production: [^Tt]', x$Variable)
+coal <- grep('([Cc]oal)|([Ll]ignite)', x$Variable)
+renew <- grep('([Bb]io)|(Production: [Ww]ind)|([Rr]enewables)', x$Variable)
+hydro <- grep('(Hydro)|(Pumped)', x$Variable)
+# Condense different categories of hydro, renewables, coal into single categories
+coal_rows <- add_column(x[coal, ][1:length(coal),] %>% 
+    group_by(company) %>%
+    summarise_at(vars(as.character(2019:1996)), sum, na.rm = TRUE), Variable = 'Production: Coal', Unit = 'TWh', .before='2019')
+renew_rows <- add_column(x[renew, ][1:length(renew),] %>% 
+    group_by(company) %>%
+    summarise_at(vars(as.character(2019:1996)), sum, na.rm = TRUE), Variable = 'Production: Renewables', Unit = 'TWh', .before='2019')
+hydro_rows <- add_column(x[hydro, ][1:length(hydro),] %>% 
+    group_by(company) %>%
+    summarise_at(vars(as.character(2019:1996)), sum, na.rm = TRUE), Variable = 'Production: Hydro', Unit = 'TWh', .before='2019')
+prodmix <- bind_rows(x[setdiff(erzeug, c(coal, renew, hydro)), ], coal_rows, renew_rows, hydro_rows)
+prodmix %>%
+  gather(as.character(2019:1996), key = 'year', value = 'Erzeugung') %>%
+  #filter(Erzeugung < 150) %>%
+  separate(Variable, into=c('Prod', 'Source'), sep = ': ') %>%
+  mutate(Year = as.numeric(year)) %>%
+  ggplot(aes(Year, Erzeugung)) +
+  #ggpattern::geom_col_pattern(aes(pattern_spacing = Source, group = Source, pattern_angle = Source, pattern = Source), 
+                              #fill            = 'white', 
+                              #colour          = 'black',
+  #                            pattern_spacing = 0.025) +
+  geom_col(aes(fill = Source, group = Source, linetype = Source)) +
+  #geom_point(aes(color = Variable)) +
+  #scale_x_continuous(limits = c(2007.5, 2019.5), breaks = seq(2008,2019,1)) +
+  facet_wrap(~ company, nrow = 2) +
+  ylim(0,NA) +
+  theme_bw() +
+  labs(x = 'Year', y = 'Thousands of Gigawatt hours (Gwh)') + #, title = 'Generation Mix') +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10)) +
+  guides(colour = guide_legend(nrow = 2))
+
+# FIGURE 1: ECOLOGICAL ECONOMICS SUBMIT
+## Visualize borrowing (+ equity = capital structure) for all 4
+verbind <- c(grep('Anleihen', x$Variable), grep('Verbindlichkeiten g', x$Variable), grep('Commercial', x$Variable))
+capmark <- grep('(Anleihen)|(Commercial)', x$Variable)
+bank <- grep('Verbindlichkeiten gegenüber Kreditinstituten:', x$Variable)
+eigkap <- grep('Bilanzielles Eigenkapital', x$Variable)
+# Condense different categories of capital markets and bank loans into single categories
+capmark_rows <- add_column(x[capmark, ][1:length(capmark),] %>% 
+                          group_by(company) %>%
+                          summarise_at(vars(as.character(2019:1996)), sum, na.rm = TRUE), Variable = 'Capital Market', Unit = 'Mill. Euros', .before='2019')
+bank_rows <- add_column(x[bank, ][1:length(bank),] %>% 
+                           group_by(company) %>%
+                           summarise_at(vars(as.character(2019:1996)), sum, na.rm = TRUE), Variable = 'Bank loans', Unit = 'Mill. Euros', .before='2019')
+eig_rows <- add_column(x[eigkap, ][1:length(eigkap),] %>% 
+                         group_by(company) %>%
+                         summarise_at(vars(as.character(2019:1996)), sum, na.rm = TRUE), Variable = 'Equity', Unit = 'Mill. Euros', .before='2019')
+financing <- bind_rows(x[setdiff(verbind, c(capmark, bank)), ], capmark_rows, bank_rows, eig_rows)
+financing$`2000`[3] <- 1 ## Setting to essentially zero to get plot to work better
+financing %>%
+  gather(as.character(2019:1996), key = 'year', value = 'Total') %>%
+  #filter(Erzeugung < 150) %>%
+  filter(company != 'Uniper' & company != 'innogy') %>%
+  mutate(Year = as.numeric(year)) %>%
+  #mutate(Total = ifelse(Total == 0, NA, Total)) %>%
+  ggplot(aes(Year, Total)) +
+  geom_area(aes(fill = Variable, group = Variable)) +
+  #geom_point(aes(color = Variable)) +
+  scale_x_continuous(limits = c(1996, 2019), breaks = seq(1996,2019,2)) +
+  facet_wrap(~ company, nrow = 2) +
+  ylim(0,NA) +
+  theme_minimal() +
+  labs(x = 'Year', y = 'Million €') +
+  theme(legend.title = element_blank(), legend.position = 'bottom', legend.direction = 'horizontal',
+        legend.text=element_text(size=10), axis.text.x = element_text(angle = 0)) +
+  guides(colour = guide_legend(nrow = 2))
+
+financing %>%
+  gather(as.character(2019:1996), key = 'year', value = 'Total') %>%
+  filter(company == "EON") %>%
+  filter(Variable == "Bank loans")
+
+## EBITA, net debt, provisions, debt factor on one two-sided y-axis plot.... AAAAAND now that it works, I think dual y-axes is a bad way to show this.
+
+earn_debt <- c(grep("^EBITDA", x$Variable), grep('Provisions', x$Variable), grep('Nettofinanzschulden', 
+      x$Variable))
+fakt <- grep('Verschuldungsfaktor', x$Variable)
+eb <- x[earn_debt,] %>%
+  gather(as.character(1996:2019), key = 'year', value = 'Total') %>%
+  filter(company != 'innogy' & company != 'Uniper') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(Year = as.numeric(year))
+faktor <- x[fakt, ] %>%
+  gather(as.character(1996:2019), key = 'year', value = 'Total') %>%
+  filter(company != 'innogy' & company != 'Uniper') %>%
+  # becouse gathering as characters because they are char when column names
+  mutate(Year = as.numeric(year))
+
+eb %>%
+  ggplot(aes(Year, Total)) +
+    geom_line(aes(color = Variable)) +
+    facet_wrap(~company, nrow = 2) +
+    theme_bw()
+
+debt <- c(grep("^EBITDA", RWE$Variable))
+fakt <- grep('Verschuldungsfaktor', RWE$Variable)
+netto <- grep('Nettofinanzschulden', RWE$Variable)
+ebda <- x[debt,] %>%
+  gather(as.character(1996:2019), key = 'year', value = 'Total')
+dfaktor <- x[fakt,] %>%
+  gather(as.character(1996:2019), key = 'year', value = 'Total')
+findebt <- x[netto,] %>%
+  gather(as.character(1996:2019), key = 'year', value = 'Total')
+df <- add_column(ebda, debtratio = dfaktor$Total, findebt = findebt$Total)
+
+ylim.prim <- c(min(c(df$Total, df$findebt), na.rm = T), max(c(df$Total, df$findebt), na.rm = T))   # in this example, precipitation
+ylim.sec <- c(min(df$debtratio, na.rm = T), max(df$debtratio, na.rm =T))    # in this example, temperature
+b <- diff(ylim.prim)/diff(ylim.sec)
+#b <- 40000/8
+a <- (ylim.prim[1] - ylim.sec[1])
+#a <- (ylim.prim[1] - 0)
+
+df %>%
+  ggplot(aes(as.numeric(year), Total)) +
+  geom_line(color = 'blue') +
+  geom_line(aes(y = findebt), color = 'green')+
+  geom_line(aes(y = a + debtratio*b), color = 'red') +
+  scale_y_continuous("Mill. Euros", sec.axis = sec_axis(~ (. - a)/b, name = "Ratio")) +
+  scale_x_continuous("Year") +
+  ggtitle("EBITDA and Debt Ratio") +
+  theme_bw()+
+  theme(axis.line.y.right = element_line(color = "red"), 
+        axis.ticks.y.right = element_line(color = "red"),
+        axis.text.y.right = element_text(color = "red"), 
+        axis.title.y.right = element_text(color = "red"))
+
+
+
+
+## ELSE: AUsschutung/cash flow; Finanzanlagen - non equity liabilities, Eigenkapitalquota (equity ratio) = Eigenkapital/Gesamtkapital (=Bilanzsumme)
+## TO DO STILL BEFORE UPPSALA:
+# - Get total el prod nubers so we have CO2/gwh
+# - Get data and graph CO2 prices in EUR market, electricity prices on EEX, stock prices for Big4/6
+# - 

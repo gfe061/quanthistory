@@ -1,0 +1,240 @@
+## SCRIPTS FOR FIRST READING OF WALLSTREET BETS CORPUS
+
+# The corpus files in 11 chunks are available here: https://u.pcloud.link/publink/show?code=VZHB9OXZmtAmbcLA3Um7iAUrEKWMhmE4HPKX
+# The can be saved to the file you use as home directory for this project and that you will then set as working directory.
+
+# Set working directory: 
+setwd("~/pCloud_sync/Projects/wallstreetbets/WSB_scrape/") #-- Mine looks like this but yours will be your working directory. 
+# You can select a working directory in RStudio via: Session -> Set Working Directory -> Choose Directory. The corpus files 
+# will need to  be in this directory.
+
+# You will need to install these packages first with the command: install.packages("PACKAGE NAME"). So for example, to install the 
+# package called tidyverse, you enter: install.packages("tidyverse")
+
+library(tidyverse)
+library(tidytext)
+
+# This command loads the corpus file into computer memory. I'd advise only loading one at a time. 
+corpus1 <- readRDS("wsb_chunks_2012-2018.Rda")
+corpus1 <- readRDS("wsb_chunks_2019.Rda")
+corpus3 <- readRDS("wsb_chunks_2020q1.Rda")
+corpus4 <- readRDS("wsb_chunks_2020q2.Rda")
+corpus5 <- readRDS("wsb_chunks_2020q3.Rda")
+corpus6 <- readRDS("wsb_chunks_2020q4.Rda")
+corpus7 <- readRDS("wsb_chunks_2021m1.Rda")
+corpus8 <- readRDS("wsb_chunks_2021m2.Rda")
+corpus9 <- readRDS("wsb_chunks_2021m3.Rda")
+corpus10 <- readRDS("wsb_chunks_2021q2.Rda")
+corpus11 <- readRDS("wsb_chunks_2021q3.Rda")
+
+# If you load a corpus file and then want to remove it from memory: rm(OBJECT NAME) -- i.e. rm(corpus1).
+
+### Utility functions: These need to be run once at the beginning of the R session.
+
+## Return submission and comments 
+sub_com_group <- function(df, subid) {
+  return_df <- df %>%
+    filter(SubID == subid) %>%
+    arrange(UTC)
+  print(return_df)
+}
+
+print_sub_com_group <- function(df, id) {
+  subid <- df[df$ID == id, 10][[1]]
+  return_df <- df %>%
+    filter(SubID == subid) %>%
+    arrange(UTC)
+  print(return_df)
+  for (i in 1:nrow(return_df)){
+    print(return_df$Text[i])
+  }
+}
+
+## Function prints out the first n sub/comment strings after (and including) a start date. 
+print_first_after <- function(df, n = 1, start = "2012-01-01", end = "2021-12-31") {
+  top <- df %>% 
+    filter(UTC >= start) %>%
+    filter(Type == "Submission") %>% top_n(n, desc(UTC))
+  for (i in top$ID) {print_sub_com_group(df, i)}
+}
+
+# Prints first n sub/comment chains in the corpus1, i.e. here -- first chains to appear on r/wallstreetbets in April 2012.
+#print_first_after(corpus1, start = "2012-05-02 15:22:15", n=20)
+
+## Prints the n sub/comments chains in specified start/end time period with most comments 
+print_top_subs <- function(df, n = 1, start = "2012-01-01", end = "2021-12-31"){
+  df <- df %>% 
+    filter(UTC <= end & UTC >= start)
+  top <- df %>%
+    filter(Type == "Submission") %>% 
+    top_n(n, Count_of_Comments) %>%
+    arrange(desc(Count_of_Comments))
+  print(top, n = n)
+  count <- 0
+  for (i in top$ID) {
+    count <- count+1
+    writeLines(paste0("\n *** Submission: ", i, " ------ Thread Number ", count, " *** \n"))
+    print_sub_com_group(df, i)}
+  totalsub <- df %>%
+    filter(Type == "Submission") %>%
+    count()
+  totalcom <- df %>%
+    filter(Type == "Comment") %>%
+    count()
+  # count number distinct values (faster than: length(unique(x)))
+  unique <- df %>%
+    summarize(n_distinct(Author))
+  words <- df %>%
+    summarize(sum(wc))
+  writeLines(paste0("\n**** Totals for this time period: ", totalsub, " Submissions; ", totalcom, " Comments; ", unique, 
+                    " unique posters; ", words, " words ****\n"))
+  return(top)
+}
+
+# Prints the n submission/comment chains in the specified start-end period with highest upvote counts (high upvote counts might be
+# for comments rather than the initial submission of the chain). Returns dataframe of the subs/coms with highest upvote counts.
+print_top_upvote <- function(df, n = 1, start = "2012-01-01", end = "2021-12-31"){
+  df <- df %>% 
+    filter(UTC <= end & UTC >= start) 
+  top <- df %>%
+    #filter(Type == "Submission") %>% 
+    top_n(n, Upvote_Count) %>%
+    arrange(desc(Upvote_Count))
+  print(top, n = nrow(top))
+  count <- 0
+  for (i in top$ID) {
+    count <- count+1
+    writeLines(paste0("\n *** Submission: ", i, ", --- Thread Number ", count, " *** \n"))
+    print_sub_com_group(df, i)}
+  totalsub <- df %>%
+    filter(Type == "Submission") %>%
+    count()
+  totalcom <- df %>%
+    filter(Type == "Comment") %>%
+    count()
+  # count number distinct values (faster than: length(unique(x)))
+  unique <- df %>%
+    summarize(n_distinct(Author))
+  words <- df %>%
+    summarize(sum(wc))
+  writeLines(paste0("\n**** Totals for this time period: ", totalsub, " Submissions; ", totalcom, " Comments; ", unique, 
+                    " unique posters; ", words, " words ****\n"))
+  return(top)
+}
+
+## Returns all subs and comments by a certain author
+return_auth <- function(df, author = NULL){
+  chosen <- df %>%
+    filter(str_detect(Author, author))
+  return(chosen)
+}
+
+
+### Viewing the corpus
+
+random_view <- function(df, keyword, ntimes=1, n=10, upvote=0, start = "2012-01-01", end = "2021-12-31"){
+  ## Function to randomly view submission-comment chains from the wallstreet bets corpus. 
+  ## The first argument of the function must be the corpus you are working with, the second the word or phrase you want to 
+  ## search for (for a wildcard, i.e. to return randomly without searching for a specific word or phrase, use: "." ) 
+  ## Third argument will select texts that return submission-comment chains that contain your seach query a certain number of times
+  ## or more -- if this is not filled in the default is one time or more. Fourth argument (n=) controls how many submission-comment
+  ## chains are returned. Lastly, (upvote = ) will return submissions or comments that have greater than a certain upvote value.
+  ## This defaults to 0.
+    chosen <- select(df, -one_of(c("ID"))) %>%
+      filter(UTC <= end & UTC >= start) %>%
+      filter(str_count(Text, keyword) >= ntimes) %>%
+      filter(Upvote_Count >= upvote)
+  chosen <- chosen[sample(nrow(chosen), n), ] %>%
+    relocate(SubID, .after = Author)
+  writeLines("\n*** Total Random Selected ***\n")
+  print(chosen)
+  for (i in 1:nrow(chosen)){
+    writeLines(paste0("\n *** Comment/Submission Chain Number ", i, " *** \n"))
+    sub <- sub_com_group(df, chosen$SubID[i])
+    for (j in 1:nrow(sub)){
+      print(sub$Text[j])  }
+  }
+  return(chosen)
+}
+
+random_sub_view <- function(df, keyword, ntimes=1, n=10, upvote=0, start = "2012-01-01", end = "2021-12-31"){
+  ## Function to randomly view submission-comment chains from the wallstreet bets corpus. 
+  ## The first argument of the function must be the corpus you are working with, the second the word or phrase you want to 
+  ## search for (for a wildcard, i.e. to return randomly without searching for a specific word or phrase, use: "." ) 
+  ## Third argument will select texts that return submission-comment chains that contain your seach query a certain number of times
+  ## or more -- if this is not filled in the default is one time or more. Fourth argument (n=) controls how many submission-comment
+  ## chains are returned. Lastly, (upvote = ) will return submissions or comments that have greater than a certain upvote value.
+  ## This defaults to 0.
+  chosen <- select(df, -one_of(c("ID"))) %>%
+    filter(UTC <= end & UTC >= start) %>%
+    filter(str_count(Text, keyword) >= ntimes) %>%
+    filter(Upvote_Count >= upvote) %>%
+    filter(Type == "Submission")
+  chosen <- chosen[sample(nrow(chosen), n), ] %>%
+    relocate(SubID, .after = Author)
+  writeLines("\n*** Total Random Selected ***\n")
+  print(chosen)
+  count <- 0
+  for (i in 1:nrow(chosen)){
+    count <- count+1
+    writeLines(paste0("\n *** Submission: ", i, " --- Thread Number ", count, " *** \n"))
+    sub <- sub_com_group(df, chosen$SubID[i])
+    for (j in 1:nrow(sub)){
+      print(sub$Text[j])  }
+  }
+  return(chosen)
+}
+
+## Example: if you have run: corpus1 <- readRDS("wsb_chunks_2012-2018.Rda")
+## The following will then search the wsb  2012-2018 corpus specifically within the dates Jan 1, 2015-Dec. 31, 2015 (note the format and that
+## the numbers have to be enclosed in "") and return 3 submission-comment chains, upvote of at least 2 for one submission or comment in the 
+## chain, which contains one or more instance of the text "gamma". Because this selects things at random, you can run the same thing over and 
+## over and get different answers. If it throws an error it is probably not finding things within your search criteria. 
+
+## This is the method I have found easiest to read through the corpus: Adjust the begin and stop dates right below (they are in 
+## year-month-date format), then run the command below that (print_top_subs). That function will print out the longest submission-
+## comment chains in the specified period and also tell you the total number of submissions, comments, total words, and number of 
+## unique comments for that time period. Through 2015 there are still only 200 or so submissions per months so viewing the top
+## 20 over two months seems like enough to get a sense of the discussion. 
+
+begin <- "2019-01-01"
+stop <- "2019-03-01"
+
+(a <- print_top_subs(corpus1, n = 1, start = begin, end = stop))
+(b <- random_sub_view(corpus1, '.', ntimes = 1, n = 20, upvote = 0, start = begin, end = stop))
+(c <- print_top_upvote(corpus1, start = begin, end = stop, n=20))
+
+## When you start getting really tons of comments around 2016, this can be a better way to view -- saves output to a separate file 
+## then can be viewed in entirety with simple word processor (the R console will only print 1000 lines)
+
+printout <- file("all.Rout", open = "wt")
+sink(printout)
+sink(printout, type = "message")
+print_top_subs(corpus1, n = 5, start = begin, end = stop)
+random_sub_view(corpus1, '.', ntimes = 1, n = 20, upvote = 0, start = begin, end = stop)
+print_top_upvote(corpus1, start = begin, end = stop, n=10)
+sink(type = "message")
+sink()
+file.show("all.Rout")
+
+
+## The last thing this will return is a table of the three submissions/comments the random search has found. If you get a submission/comment
+## chain that has lots of comments, it might have cut off some of them. If you want to read just that chain and see all the comments, you can do:
+## sub_com_group(SubID), save the output to an object, and then View() the object. For example: 
+
+print_sub_com_group(corpus1, "sr5dr")
+View(a) 
+
+# This opens a new window, if you mouse-hover over the text column it will show you a longer portion of the text. This too, will cut off
+# if the text is too long. In that case, you can enter: a$Text[n] where n is the line number of the submission/comment text you want to 
+# read in full.
+
+# This does not give you anything other than text and loses the tree hierarchy of the comments. If you want to see these you can
+# just enter the submission ID into your browser to see it on reddit:
+
+# https://www.reddit.com/r/wallstreetbets/comments/SubID
+# For example, to see the thread based on the submission 16x448:  https://www.reddit.com/r/wallstreetbets/comments/16x448
+
+
+## Trying to keep this as simple as possible. Let me know if there's other functionality that would help, it'll probably be very easy to do 
+## and be of help to me too. 
