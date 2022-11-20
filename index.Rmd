@@ -18,7 +18,6 @@ nocite: '@*'
 <!-- for (f in files) rmarkdown::render(f) -->
 
 
-
 ```{r klippy, echo=FALSE, include=TRUE}
 klippy::klippy(position = c('top', 'right'))
 ```

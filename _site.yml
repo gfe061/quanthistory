@@ -12,30 +12,36 @@ navbar:
     - text: "Schedule"
       icon: fa-info
       href: schedule.html
-    - text: "Session 1.1"
+    - text: "Quantitative methods"
       icon: fa-book
-      href: 1_1-DescStat.html
-    - text: "Session 1.2"
+      menu: 
+      - text: "Day 1"
+      - text: "Descriptive statistics"
+        href: 1_1-DescStat.html
+      - text: "Day 2"
+      - text: "Correlation analysis"
+        href: 2_1-CorrAnalysis.html
+      - text: "Day 3"
+      - text: "Regression analysis"
+        href: 3_1-RegAnalysis.html
+      - text: "Day 4"
+      - text: "Uncertainty"
+        href: 4_1-Uncertainty.html
+    - text: "Computational text analysis"
       icon: fa-book
-      href: 1_2-readingcleaning.html
-    - text: "Session 2.1"
-      icon: fa-book
-      href: 2_1-CorrAnalysis.html
-    - text: "Session 2.2"
-      icon: fa-book
-      href: 2_2-WordFreq.html
-    - text: "Session 3.1"
-      icon: fa-book
-      href: 3_1-RegAnalysis.html
-    - text: "Session 3.2"
-      icon: fa-book
-      href: 3_2-Topicmodelling.html
-    - text: "Session 4.1"
-      icon: fa-book
-      href: 4_1-Uncertainty.html
-    - text: "Session 4.2"
-      icon: fa-book
-      href: 4_2-WordEmbedding.html
+      menu:
+      - text: "Day 1"
+      - text: "Reading and cleaning text data"
+        href: 1_2-readingcleaning.html
+      - text: "Day 2"
+      - text: "Word frequency and dictionary methods"
+        href: 2_2-WordFreq.html
+      - text: "Day 3"
+      - text: "Topic modelling"
+        href: 3_2-Topicmodelling.html
+      - text: "Day 4"
+      - text: "Word embedding"
+        href: 4_2-WordEmbedding.html
     # - text: "Wrap-up"
     #   icon: fa-book
     #   href: wrapup.html
@@ -44,7 +50,7 @@ navbar:
   #     href: "mailto: gregory.fergusoncradler@inn.no"
 output:
   html_document:
-    theme: spacelab
+    theme: readable
     highlight: textmate
     include:
       after_body: footer.html
