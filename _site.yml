@@ -12,30 +12,30 @@ navbar:
     - text: "Schedule"
       icon: fa-info
       href: schedule.html
-    - text: "Session 1"
+    - text: "Session 1.1"
       icon: fa-book
-      href: 1_RBasics.html
-    - text: "Session 2"
+      href: 1_1-DescStat.html
+    - text: "Session 1.2"
       icon: fa-book
-      href: 2_ScrapingAndReadingInDocuments.html
-    - text: "Session 3"
+      href: 1_2-readingcleaning.html
+    - text: "Session 2.1"
       icon: fa-book
-      href: 3_CleaningAndManipulating.html
-    - text: "Session 4"
+      href: 2_1-CorrAnalysis.html
+    - text: "Session 2.2"
       icon: fa-book
-      href: 4_WordFreq.html
-    - text: "Session 5"
+      href: 2_2-WordFreq.html
+    - text: "Session 3.1"
       icon: fa-book
-      href: 5_SentAndDict.html
-    - text: "Session 6"
+      href: 3_1-RegAnalysis.html
+    - text: "Session 3.2"
       icon: fa-book
-      href: 6_DocSimil.html
-    - text: "Session 7"
+      href: 3_2-Topicmodelling.html
+    - text: "Session 4.1"
       icon: fa-book
-      href: 7_topicmodelling.html
-    - text: "Session 8"
+      href: 4_1-Uncertainty.html
+    - text: "Session 4.2"
       icon: fa-book
-      href: 8_WordEmbedding.html
+      href: 4_2-WordEmbedding.html
     # - text: "Wrap-up"
     #   icon: fa-book
     #   href: wrapup.html

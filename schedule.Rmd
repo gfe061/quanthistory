@@ -13,42 +13,30 @@ output:
 <h2>Schedule</h2>
 <br>
 
-<h3>Thursday, August 12</h3>
+<h3>Monday, November 21</h3>
 
-9:00 – 9:30		Introductions and workshop goals [[PDF](Presentations/Introduction.pdf)]
+10:00 – 13:00	  Session 1.1: Descriptive statistics 
 
-9:30 – 10:30		Session 1: Basics of R 
+14:00 -- 17:00	Session 1.2: Collecting, reading and cleaning text data in R 
 
-10:30 – 10:45 		Break
+<h3>Tuesday, November 22</h3>
 
-10:45 – 12:15		Session 2: Web scraping and reading documents into R
+9:00 - 12:00  Session 2.1: Correlation analysis
 
-12:15 – 1:15		Lunch
+13:00 - 16:00	Session 2.2: Word frequency, dictionary methods, correlation/collocation analysis
 
-1:15 – 3:00		Session 3: Cleaning and manipulating text in R
+<h3>Wednesday, November 23</h3>
 
-3:00 – 3:30		Break
+9:00 - 12:00  Session 3.1: Regression analysis
 
-3:30 – 5:00		Session 4: Word frequencies, word clouds, and basic counting 
+13:00 - 16:00	Session 3.2: Topic models [[PDF](Presentations/Topic_models.pdf)]
 
-5:00 - 			Troubleshooting
+<h3>Thursday, November 24</h3>
 
-<br>
+9:00 - 12:00  Session 4.1: Dealing with uncertainty
 
-<h3>Friday, August 13:</h3>
+13:00 - 16:00	Session 4.2: Word embedding [[PDF](Presentations/Word_embedding.pdf)]
 
-9:00 – 10:30		Session 5: POS and dictionary methods
+<h3>Friday, November 25</h3>
 
-10:30 – 10:45 		Break
-
-10:45 – 12:15		Session 6: Document similarity and co-occurrence
-
-12:15 – 1:15		Lunch
-
-1:15 – 3:00		Session 7: Topic models: theory and practice [[PDF](Presentations/Topic_models.pdf)]
-
-3:00 – 3:30		Break
-
-3:30 – 4:30		Continuation of Session 7
-
-4:30 – 5:15 	Conclusion: Word embedding, other methods of interest and ways and ways forward [[PDF](Presentations/Word_embedding.pdf)]
+9:00 - 16:00  Session 5: Student work and presentations

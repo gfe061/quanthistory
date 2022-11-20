@@ -13,6 +13,12 @@ bibliography: textanalysis_general.bib
 nocite: '@*'
 ---
 
+<!-- # To knit a bunch of files at once -->
+<!-- files <- list.files(pattern = "[.]Rmd$") -->
+<!-- for (f in files) rmarkdown::render(f) -->
+
+
+
 ```{r klippy, echo=FALSE, include=TRUE}
 klippy::klippy(position = c('top', 'right'))
 ```
