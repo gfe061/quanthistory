@@ -505,13 +505,16 @@ sessions behind a computer (approx. 2 hours). Students will learn by
 applying the different concepts to real data used by historians.</p>
 <p>Apart from actively participating in the sessions, students are
 expected to deliver a take-home assignment after the course is finished.
-A candidate who satisfactorily passes the course will be able to: -
-Critically engage with studies relying on quantitative methods. -
-Conduct original research using these tools in academia, the public, or
-the business sector. - Continue to develop skills in quantitative
-methods based on the foundations provided in this course. - Acquire
-basic competence in R, a statistical software widely used by
-practitioners in many fields.</p>
+A candidate who satisfactorily passes the course will be able to:</p>
+<ul>
+<li>Critically engage with studies relying on quantitative methods.</li>
+<li>Conduct original research using these tools in academia, the public,
+or the business sector.</li>
+<li>Continue to develop skills in quantitative methods based on the
+foundations provided in this course.</li>
+<li>Acquire basic competence in R, a statistical software widely used by
+practitioners in many fields.</li>
+</ul>
 </div>
 <div id="pre-requisites" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Pre-requisites</h1>
@@ -528,10 +531,10 @@ href="TutorialInstructions.html">here</a>.</p>
 <div id="practicalities" class="section level1" number="4">
 <h1><span class="header-section-number">4</span> Practicalities</h1>
 <p>The following script will install (if not already installed) and load
-all packages used in this tutorial. (there’s bound to be a couple I’ve
+all packages used in this tutorial. (there’s bound to be a couple we’ve
 forgotten, we’ll add these as we go).</p>
 <pre class="r"><code>if (!requireNamespace(&quot;xfun&quot;)) install.packages(&quot;xfun&quot;)
-xfun::pkg_attach2(&quot;tidyverse&quot;, &quot;lubridate&quot;, &quot;rvest&quot;, &quot;stringr&quot;, &quot;readtext&quot;, &quot;tesseract&quot;, &quot;tidytext&quot;, &quot;SnowballC&quot;, &quot;wordcloud&quot;, &quot;wordcloud2&quot;, &quot;widyr&quot;, &quot;quanteda&quot;, &quot;quanteda.textstats&quot;, &quot;wordVectors&quot;, &quot;magrittr&quot;, &quot;pdftools&quot;, &quot;devtools&quot;)
+xfun::pkg_attach2(&quot;tidyverse&quot;, &quot;lubridate&quot;, &quot;rvest&quot;, &quot;stringr&quot;, &quot;readtext&quot;, &quot;tesseract&quot;, &quot;tidytext&quot;, &quot;SnowballC&quot;, &quot;wordcloud&quot;, &quot;wordcloud2&quot;, &quot;widyr&quot;, &quot;quanteda&quot;, &quot;quanteda.textstats&quot;, &quot;magrittr&quot;, &quot;pdftools&quot;, &quot;devtools&quot;, &quot;tsne&quot;, &quot;topicmodels&quot;, &quot;readtext&quot;)
 # The following two packages have Java dependencies that might give some (especially Windows) machines trouble. No worries if they don&#39;t load on your computer, I&#39;ll demonstrate running them on RStudio Cloud.
 xfun::pkg:attach2(&quot;tabulizer&quot;, &quot;openNLP&quot;)
 install.packages(&quot;devtools&quot;)

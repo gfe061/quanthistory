@@ -40,8 +40,12 @@ The course revolves around two main themes:
 
 Taught intensively over five days, the course is structured into 10 three-hour sessions combining lectures (approx. 1 hour) and applied sessions behind a computer (approx. 2 hours). Students will learn by applying the different concepts to real data used by historians.
 
-Apart from actively participating in the sessions, students are expected to deliver a take-home assignment after the course is finished. A candidate who satisfactorily passes the course will be able to: - Critically engage with studies relying on quantitative methods. - Conduct original research using these tools in academia, the public, or the business sector. - Continue to develop skills in quantitative methods based on the foundations provided in this course.
-- Acquire basic competence in R, a statistical software widely used by practitioners in many fields.
+Apart from actively participating in the sessions, students are expected to deliver a take-home assignment after the course is finished. A candidate who satisfactorily passes the course will be able to: 
+
+  * Critically engage with studies relying on quantitative methods. 
+  * Conduct original research using these tools in academia, the public, or the business sector. 
+  * Continue to develop skills in quantitative methods based on the foundations provided in this course.
+  * Acquire basic competence in R, a statistical software widely used by practitioners in many fields.
 
 
 # Pre-requisites
@@ -52,11 +56,11 @@ We will be using R, a widely popular statistical software, which has the added a
 
 # Practicalities
 
-The following script will install (if not already installed) and load all packages used in this tutorial. (there's bound to be a couple I've forgotten, we'll add these as we go).
+The following script will install (if not already installed) and load all packages used in this tutorial. (there's bound to be a couple we've forgotten, we'll add these as we go).
 
 ```{r, eval = FALSE}
 if (!requireNamespace("xfun")) install.packages("xfun")
-xfun::pkg_attach2("tidyverse", "lubridate", "rvest", "stringr", "readtext", "tesseract", "tidytext", "SnowballC", "wordcloud", "wordcloud2", "widyr", "quanteda", "quanteda.textstats", "wordVectors", "magrittr", "pdftools", "devtools")
+xfun::pkg_attach2("tidyverse", "lubridate", "rvest", "stringr", "readtext", "tesseract", "tidytext", "SnowballC", "wordcloud", "wordcloud2", "widyr", "quanteda", "quanteda.textstats", "magrittr", "pdftools", "devtools", "tsne", "topicmodels", "readtext")
 # The following two packages have Java dependencies that might give some (especially Windows) machines trouble. No worries if they don't load on your computer, I'll demonstrate running them on RStudio Cloud.
 xfun::pkg:attach2("tabulizer", "openNLP")
 install.packages("devtools")
