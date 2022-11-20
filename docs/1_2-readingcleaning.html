@@ -455,6 +455,14 @@ cleaning text data</h1>
 <pre class="r"><code>library(readtext)
 library(tidyverse)
 library(tabulizer)</code></pre>
+<p>The Charles Dickens novels can be downloaded <a
+href="data/docs/A%20Christmas%20Carol%20-%20Charles%20Dickens%20-%201843.pdf">here</a>,
+<a
+href="data/docs/David%20Copperfield%20-%20Charles%20Dickens%20-%201850.txt">here</a>,
+<a
+href="data/docs/Hard%20Times%20-%20Charles%20Dickens%20-%201854.docx">here</a>,
+and <a
+href="data/docs/Oliver%20Twist%20-%20Charles%20Dickens%20-%201838.html">here</a>.</p>
 <div id="reading-in-documents" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Reading in
 Documents</h1>
@@ -467,13 +475,11 @@ number="1.1">
 or pdf files</h2>
 <p>Historians are interested in old books and there are a lot of old
 books freely accessible on the web already digitized (and some of them
-even cleaned). For an example, let’s download a handful of Charles
-Dickens’ books from Project Gutenberg. Download and save the first a
-couple of his novels as HTML files or UTF-8 text files. Save them in a
-folder in your working directory called “data” and within that folder
-another folder named “docs” (or wherever else but then you’ll need to
-tell R where in look in the following step. Save them in the form
-“[Novel_name] - [Author] - [Year]”.</p>
+even cleaned). For an example, I’ve gone to <a
+href="https://www.gutenberg.org/">Project Gutenberg</a> and downloaded
+four Charles Dickens novels. To demonstrate a point, I have saved them
+in four different formats: Word, pdf, txt, html and saved them (links
+just above) with the file names “[Novel_name] - [Author] - [Year]”.</p>
 <p>Now let’s take a look at what is in that folder. I’ve also saved some
 files as Word and PDF files.</p>
 <pre class="r"><code>(books_list &lt;- list.files(path = &quot;data/docs&quot;, full.names = TRUE))</code></pre>
@@ -534,24 +540,28 @@ doubtlessly many more, are formatted the same way.
 try it yourself but it’s going to read from left to right across
 columns, rather than the left column first then the right.</p>
 <p>As of a couple of years ago one had to get really creative and cut
-the pdfs up and then sew them back together but now we have an R package
-that is quite smart about this called <code>tabulizer</code>. The
-package has java dependencies that might create huge problems in
-Windows. Another option is to use Rstudio’s quite cool cloud service at
-<a href="https://rstudio.cloud" class="uri">https://rstudio.cloud</a>.
-We can upload documents there, install the packages we need on then
-download the resulting dataframe we build there.</p>
-<p>Let’s take a historical Storting melding. The front page looks like
-this.</p>
+the pdfs up and then sew them back together (there might still be times
+when you want to do this, see the <a
+href="https://docs.ropensci.org/magick/articles/intro.html"><code>magick</code></a>
+package) but now we have an R package that is quite smart about this
+called <code>tabulizer</code>. The package has java dependencies that
+might create huge problems in Windows. Another option is to use
+Rstudio’s quite cool cloud service at <a href="https://rstudio.cloud"
+class="uri">https://rstudio.cloud</a>. We can upload documents there,
+install the packages we need on then download the resulting dataframe we
+build there.</p>
+<p>Let’s take a historical <a href="data/stmeld8_kongo.pdf">Storting
+melding</a>. The front page looks like this.</p>
 <div class="figure" style="text-align: center">
 <img src="data/st_meld.jpg" alt="Clear machine-readable text but in columns." width="395" />
 <p class="caption">
 Clear machine-readable text but in columns.
 </p>
 </div>
-<p>Other documents are printed in multi-column format as well. First we
-might try <code>readtext</code> and print out the first 1000 characters
-to see how things look.</p>
+<p>Hmm, multi-column format. First we might try <code>readtext</code>
+and print out the first 1000 characters to see how things look. Save the
+pdf somewhere you’ll know where to access it (I’ve saved midne in the
+“data” folder in my working drive).</p>
 <pre class="r"><code>df&lt;- readtext(&#39;data/stmeld8_kongo.pdf&#39;)
 str_sub(df$text, 1, 1000) # if we print out in cat() we see that the spacing is preserved from the original pdf</code></pre>
 <pre><code>## [1] &quot;                                                                       Utenriksdepartementet\n\n\n\n\n                                 St. meld. nr. 8.\n                                      (1960-61)\n             Melding om Norges deltaking i De Forente Nasjoners\n                            vaktstyrke i Kongo.\n                  Tilråding fra Utenriksdepartementet av 23. september 1960,\n                          godkjent ved kongelig resolusjon samme dag.\n\n                     (Foredratt av utenriksminister Halvard Lange.)\n\n    Den 30. juni 1960 ble tidligere Belgisk Kongo     Samtidig med dette brøt Katanga-provinsen\nproklamert som selvstendig stat.                    seg løs og proklamerte seg som selvstendig\n    Avtalen om at området som hadde vært            stat.\nunder belgisk overhøyhet siden 1885, skulle\nbli uavhengig, var inngått i Brussel i januar          Mot denne bakgrunn sendte den kongole\n1960 mellom den belgiske regjering og poli          siske regjering den 12. juli en telegr&quot;</code></pre>
@@ -577,7 +587,8 @@ might, I highly recommend tabulizer’s very cool
 <code>extract_areas()</code> function. Say we have a page like below and
 we’d like to extract just the table from Statoil’s 2001 <a
 href="https://www.equinor.com/sustainability/sustainability-reports-archive">Sustainability
-Report</a>.</p>
+Report</a> (<a href="data/sustainability-report-2001-equinor.pdf">direct
+link</a>).</p>
 <div class="figure" style="text-align: center">
 <img src="data/statoilSRExample.jpg" alt="Page 44 of Statoil's 2001 Sustainability Report." width="214" />
 <p class="caption">
@@ -610,20 +621,19 @@ computers but the gap is steadily shrinking and might one day in the
 future disappear. For now though, we’ll have to deal with less than
 perfection.</p>
 <p>R has “bindings” (packages that give access to) tessaract, which is
-an open source Google OCR project. Tessaract reads png images so images
-not saved as png will need to be converted. Below is an example using
-pdftools to do this from .pdf (see the Tessaract <a
+an open source Google OCR project. Below is an example using pdftools to
+do this from .pdf (see the Tessaract <a
 href="vignette">https://cran.r-project.org/web/packages/tesseract/vignettes/intro.html</a>
 for an example of how to do this for .jpg files using the R package
-magick.)</p>
+<code>magick</code>.)</p>
 <p>The way OCR works is that the algorithms are made to “learn” by
 ingesting a large amount of data for which the right answers are known
 (ie. images of text that have been, perfectly, digitized). The
-algothithms trained to recognize English are included in the package,
-anything else has to be downloadde by hand as shown below (to find you
+algorithms trained to recognize English are included in the package,
+anything else has to be downloaded by hand as shown below (to find you
 needed language’s three letter code, see the <a
 href="tessdata">https://github.com/tesseract-ocr/tessdata</a> github
-repository and especially the list of available lanugages <a
+repository and especially the list of available languages <a
 href="here">https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html</a>).</p>
 <p>Here is an example from my archive photos, a document form the
 Norwegian Riksarkivet in Oslo.</p>
@@ -633,11 +643,11 @@ we’ll need to convert it to an image format (well use .png here) first.
 We’ll use the package <code>pdftools</code> to do this. Let’s first find
 a document to practice on. All the defaults in Tesseract are English so
 this is generally fairly straightforward. Other languages are more
-challenging so we’ll do a Norwegian example. We’ll take the King’s
-opening speech to the Stortinget in 1925. If we got to historical
-documents on the Stortinget’s <a
+challenging so we’ll do a Norwegian example.</p>
+<p>We’ll take the King’s opening speech to the Stortinget in 1925. If we
+got to historical documents on the Stortinget’s <a
 href="webpage">https://www.stortinget.no/no/Saker-og-publikasjoner/Stortingsforhandlinger/#historiske-dokumenter</a>,
-go to “Pulikasjonstitler”, 1925 and search for “Hans Majestet Kongens
+go to “Publikasjonstitler”, 1925 and search for “Hans Majestet Kongens
 tale til det 74de ordentlige Storting ved dets åpning” (or just “hans
 majastet” will probably work to). Download the speech, preferably with a
 helpful title such as “Storting_KongHaakon_1925.pdf” or something of the
@@ -670,8 +680,11 @@ advanced methods than we’ll discuss here. For code and brief discussion,
 see the <a href="#Appendix">Appendix</a>. The second is a corpus of
 Sustainability Reports for several major international oil
 companies.</p>
-<pre class="r"><code>library(tidyverse)
-nobel &lt;- read_csv(&quot;data/NobelPeace.csv&quot;, locale=locale(encoding = &quot;latin1&quot;)) %&gt;%
+<p>The nobel corpus saved as csv is <a
+href="data/NobelPeace.csv">here</a> and the oil company sustainability
+reports <a href="data/srps.csv">here</a>. First let’s read them into
+R.</p>
+<pre class="r"><code>nobel &lt;- read_csv(&quot;data/NobelPeace.csv&quot;, locale=locale(encoding = &quot;latin1&quot;)) %&gt;%
   select(!...1)
 sr &lt;- read_csv(&quot;data/srps.csv&quot;)</code></pre>
 <div id="viewing-your-tibble-corpus" class="section level2"
@@ -686,7 +699,7 @@ First things first, there are numerous ways to try to get an overview of
 the data. If you just enter the dataframe’s name in R you will get the
 first few lines. Alternately, you can use <code>print()</code> – tibbles
 are <a
-href="https://tibble.tidyverse.org/reference/formatting.html">build</a>
+href="https://tibble.tidyverse.org/reference/formatting.html">built</a>
 to make printing and viewing dataframes easier. If we want to print all
 rows (you have to be careful with this, if you have millions of rows
 this will probably crash R) we can do this.</p>
@@ -826,12 +839,15 @@ importing process so we only have the text itself. Looking at our
 <code>nobel$AwardSpeech[1]</code> call above we see some s, ’s, s. These
 are <a href="https://en.wikipedia.org/wiki/Escape_character">escape
 characters</a>. To see what they do:</p>
-<pre class="r"><code>test &lt;- &quot;     Here \n there and \t\t\t everywhere.\n&quot;
+<pre class="r"><code>test &lt;- &quot;     Here \n there \t\t\t and \n\n\reverywhere.\n&quot;
 print(test)</code></pre>
-<pre><code>## [1] &quot;     Here \n there and \t\t\t everywhere.\n&quot;</code></pre>
+<pre><code>## [1] &quot;     Here \n there \t\t\t and \n\n\reverywhere.\n&quot;</code></pre>
 <pre class="r"><code>cat(test)</code></pre>
 <pre><code>##      Here 
-##  there and            everywhere.</code></pre>
+##  there            and 
+## 
+## 
+everywhere.</code></pre>
 <p>There are also things like <code>\u0092</code> that are charcter
 encodings that have gotten garbled – this one representing an
 apostrophe. We also might want to look for where there is more than one

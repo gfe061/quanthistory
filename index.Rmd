@@ -30,6 +30,8 @@ This course provides an in-depth introduction to quantitative and computational 
 
 No background in statistics is required and statistical theory and mathematics will be kept to a minimum. The goal is to provide students with the tools to critically engage with the literature relying on quantitative methods and to be able to conduct original research using these tools in academia, the public sector, or business. In the process, students will learn basic programming skills in R, a statistical software widely used by practitioners in many different fields both inside and outside academia. 
 
+This course follows a one-day course overview of quantitative methods in history held in October. It was a recommended precursor but not a prerequisite for this course. See the [reading list](Presentations/QM_Hist_1day.pdf) for this course and the presentations on [quantitative methods in history](Presentations/QiH_1.pdf) and [computational text methods](Presentations/Presentation_QuantifyingTexts_20-10-2022.pdf).
+
 # Goals
 
 The course revolves around two main themes: 
@@ -44,7 +46,7 @@ Apart from actively participating in the sessions, students are expected to deli
 
 # Pre-requisites
 
-See the [reading list](pensum.html) [PDF](Presentations/Quantifying_History_Readings.pdf).
+See the [reading list](pensum.html) [[PDF](Presentations/Quantifying_History_Readings.pdf)].
 
 We will be using R, a widely popular statistical software, which has the added advantage of being free. Please download it in your laptops before coming to Trondheim. In addition, we strongly encourage to complete a short sequence of tutorials to smooth the learning curve, so you are not completely new to the software before the course starts. Instructions for installing R, RStudio, and R tutorials are [here](TutorialInstructions.html).
 
