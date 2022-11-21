@@ -187,7 +187,7 @@ There are also things like ``\u0092`` that are charcter encodings that have gott
 
 ```{r}
 # Practice on our small test string
-test <- "     Here \n there and \t\t\t everywhere.\n"
+test <- "     Here \n there and \t\t\t everywhere.\n         "
 test_clean <- str_replace_all(test, "[(\\n)(\\r)(\\t)]", ' ')
 test_clean <- str_replace_all(test_clean, " {2,}", " ")
 test_clean <- str_replace_all(test_clean, "^ *| *$", "")
@@ -200,23 +200,23 @@ That removed all those spacing encodings and whitespace. But it won't be any sur
 str_squish(test) 
 ```
 
-So that was simple. Now the unicode encodings from the Nobel speaches.
+So that was simple. Now the unicode encodings from the Nobel speeches.
 
 ```{r}
 speech <- nobel$AwardSpeech[1]
-str_replace(speech, "\u0092", "'")
+str_replace_all(speech, "\u0092", "'")
 ```
-
-<!-- Well, that should have worked, but didn't. In fact, when we search for that escaped unicode character, regex is actually searching for the character itself, not the code. So we have to double escape it. Which is R means 3 backslashes. One final change that is usually made is to make all letters lowercase so as to make word searches easier. -->
 
 ```{r}
 speech %>%
   str_replace_all("\u0092", "'") %>%
-  str_replace_all("(\u0093)|(\u0094)", '"') %>%
+  str_replace_all("(\u0093)|(\u0094)", "'") %>%
+  str_replace_all("[0-9]\\.", ".") %>%
   str_squish() %>%
-  str_to_lower() %>% # make all letters lower case
-  writeLines()
+  str_to_lower()
 ```
+
+(Backslashes, especially, are confusing. For a quick refresher on regex in R, take a look at the quick tidyverse [overview](https://stringr.tidyverse.org/articles/regular-expressions.html#escaping).)
 
 That looks pretty clean just as text. For most of our text analysis we're actually going to remove all punctuation, but there is an argument to be made for getting as clean an original text as you can to start out with. Now that we know how to use ``stringr`` and regular expressions, we can easily strip out all punctuation. (some of the packages we will be using will also do this automatically for us as well)
 
@@ -251,11 +251,10 @@ write_rds(nobel, "data/nobel_cleaned.Rds")
 More information on regular expressions:
 - https://www.princeton.edu/~mlovett/reference/Regular-Expressions.pdf
 - @wickham2016r, chapter 14.
-- 
 
 ## Excercises
 
-- Look at other excess text in the Nobel corpus. How can we write code to cut these peices out?
+- Look at other excess text in the Nobel corpus. How can we write code to cut these pieces out?
 - Are the problems the same with the SR report corpus? Take a look and see if we can run the same code or we need to do different things to clean that corpus.
 
 

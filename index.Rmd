@@ -62,7 +62,7 @@ The following script will install (if not already installed) and load all packag
 if (!requireNamespace("xfun")) install.packages("xfun")
 xfun::pkg_attach2("tidyverse", "lubridate", "rvest", "stringr", "readtext", "tesseract", "tidytext", "SnowballC", "wordcloud", "wordcloud2", "widyr", "quanteda", "quanteda.textstats", "magrittr", "pdftools", "devtools", "tsne", "topicmodels", "readtext")
 # The following two packages have Java dependencies that might give some (especially Windows) machines trouble. No worries if they don't load on your computer, I'll demonstrate running them on RStudio Cloud.
-xfun::pkg:attach2("tabulizer", "openNLP")
+xfun::pkg_attach2("tabulizer", "openNLP")
 install.packages("devtools")
 devtools::install_github("bmschmidt/wordVectors")
 ```

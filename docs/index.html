@@ -536,7 +536,7 @@ forgotten, we’ll add these as we go).</p>
 <pre class="r"><code>if (!requireNamespace(&quot;xfun&quot;)) install.packages(&quot;xfun&quot;)
 xfun::pkg_attach2(&quot;tidyverse&quot;, &quot;lubridate&quot;, &quot;rvest&quot;, &quot;stringr&quot;, &quot;readtext&quot;, &quot;tesseract&quot;, &quot;tidytext&quot;, &quot;SnowballC&quot;, &quot;wordcloud&quot;, &quot;wordcloud2&quot;, &quot;widyr&quot;, &quot;quanteda&quot;, &quot;quanteda.textstats&quot;, &quot;magrittr&quot;, &quot;pdftools&quot;, &quot;devtools&quot;, &quot;tsne&quot;, &quot;topicmodels&quot;, &quot;readtext&quot;)
 # The following two packages have Java dependencies that might give some (especially Windows) machines trouble. No worries if they don&#39;t load on your computer, I&#39;ll demonstrate running them on RStudio Cloud.
-xfun::pkg:attach2(&quot;tabulizer&quot;, &quot;openNLP&quot;)
+xfun::pkg_attach2(&quot;tabulizer&quot;, &quot;openNLP&quot;)
 install.packages(&quot;devtools&quot;)
 devtools::install_github(&quot;bmschmidt/wordVectors&quot;)</code></pre>
 </div>
