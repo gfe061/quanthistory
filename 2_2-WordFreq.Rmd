@@ -12,6 +12,8 @@ bibliography: textanalysis.bib
 klippy::klippy(position = c('top', 'right'))
 ```
 
+[Here](data/nobel_cleaned.Rds) is the Nobel corpus we'll use for this section. [Script](data/script_tuesday_text.R) used in seminar. Oil company sustainability [reports](data/srps.csv).
+
 # Tidy corpus form
 
 We've talked about tidy format -- each variable a column, each observation a row, each type of observational unit a table. We've taken speeches at the Nobel prize and pages of oil company Sustainability Reports as our observations and can use this to do some transformations -- do total word counts or specific word frequencies. But once we start really doing analysis at the level of the word, tidy rules would seem to dictate that we treat not individual texts but individual _words_ as observations. Thus tidytext format is a table with one word per row. 
@@ -144,7 +146,7 @@ dat <- nobel_tidy %>%
   mutate(freq = n) %>%
   select(word, freq) %>%
   top_n(200)
-wordcloud2(dat, size = 2)
+wordcloud2(dat, size = 1)
 ```
 
 It's also possible to do word clouds that compare two documents. To do this we'll need to step outside the tidyverse and organize our data in other formats so we save this for Session 5. 
@@ -213,11 +215,10 @@ For this and many other reasons linguists have long been interested in writing a
 
 One way we could imagine going about this is with a dictionary that identified nouns, verbs, etc. but this is clearly naive -- many a word can be both noun and verb and much will depend on context. So we'll use the openNLP package and write this function^[Based on examples from @clark2018text, @schweinberger2021pos, and especially @niekler2020.]
 
-```{r, eval=FALSE}
+```{r}
 library(NLP)
 library(tm)  # load before openNLP
 library(openNLP)
-library(openNLPmodels.en)
 
 POStagger <- function(text, filter = NULL){
   # defining annotators 
@@ -247,7 +248,7 @@ POStagger <- function(text, filter = NULL){
 }
 
 nobel <- read_rds("data/nobel_cleaned.Rds")
-POStagger(nobel$text[1])
+POStagger(nobel$AwardSpeech[1])
 ```
 
 This yields a nice dataframe with tokens in the first column and POS in the second column. The POS are not just "noun", "verb" and so on but more finely differentiated. See [here](https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html) for a list of abbreviations. Using the same filter, group_by, etc methods we can now find lists of most frequently words by type of speech. There are, of course, other applications we might imagine when POS-tagging is used in conjunction with other topics discussed in the workshop. 

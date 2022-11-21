@@ -79,7 +79,7 @@ knitr::include_graphics("data/stortExample.jpg")
 
 As of a couple of years ago one had to get really creative and cut the pdfs up and then sew them back together (there might still be times when you want to do this, see the [``magick``](https://docs.ropensci.org/magick/articles/intro.html) package) but now we have an R package that is quite smart about this called ``tabulizer``. The package has java dependencies that might create huge problems in Windows. Another option is to use Rstudio's quite cool cloud service at https://rstudio.cloud. We can upload documents there, install the packages we need on then download the resulting dataframe we build there. 
 
-Let's take a historical [Storting melding](data/stmeld8_kongo.pdf). The front page looks like this.
+Let's take a historical [Stortings melding](data/stmeld8_kongo.pdf). The front page looks like this.
 
 ```{r, echo=FALSE, fig.align="center", fig.cap = "Clear machine-readable text but in columns."}
 knitr::include_graphics("data/st_meld.jpg")
@@ -120,9 +120,9 @@ If you have numerous documents with tables at the same place you can also specif
 
 Perhaps the documents we historians are most likely to want to analyze are hand-scanned archival documents. These we might have as pictures (jgp or gif or tiff formats perhaps) or pdf files on our local machine. To make these digitally analyzable we'll need to use optical character recognition (OCR) technology. This is a rapidly progressing frontier of machine learning and the technology is constantly getting better. Humans are still far better at reading and recognizing text than computers but the gap is steadily shrinking and might one day in the future disappear. For now though, we'll have to deal with less than perfection.
 
-R has "bindings" (packages that give access to) tessaract, which is an open source Google OCR project. Below is an example using pdftools to do this from .pdf (see the Tessaract [https://cran.r-project.org/web/packages/tesseract/vignettes/intro.html](vignette) for an example of how to do this for .jpg files using the R package ``magick``.)
+R has "bindings" (packages that give access to) tessaract, which is an open source Google OCR project. Below is an example using pdftools to do this from .pdf (see the Tessaract [vignette](https://cran.r-project.org/web/packages/tesseract/vignettes/intro.html) for an example of how to do this for .jpg files using the R package ``magick``.)
 
-The way OCR works is that the algorithms are made to "learn" by ingesting a large amount of data for which the right answers are known (ie. images of text that have been, perfectly, digitized). The algorithms trained to recognize English are included in the package, anything else has to be downloaded by hand as shown below (to find you needed language's three letter code, see the [https://github.com/tesseract-ocr/tessdata](tessdata) github repository and especially the list of available languages [https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html](here)). 
+The way OCR works is that the algorithms are made to "learn" by ingesting a large amount of data for which the right answers are known (ie. images of text that have been, perfectly, digitized). The algorithms trained to recognize English are included in the package, anything else has to be downloaded by hand as shown below (to find you needed language's three letter code, see the [tessdata](https://github.com/tesseract-ocr/tessdata) github repository and especially the list of available languages [here](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)). 
 
 Here is an example from my archive photos, a document form the Norwegian Riksarkivet in Oslo. 
 
@@ -151,9 +151,8 @@ We'll use two sample corpora as examples and test corpora for the rest of the wo
 The nobel corpus saved as csv is [here](data/NobelPeace.csv) and the oil company sustainability reports [here](data/srps.csv). First let's read them into R.
 
 ```{r, message = FALSE}
-nobel <- read_csv("data/NobelPeace.csv", locale=locale(encoding = "latin1")) %>%
-  select(!...1)
-sr <- read_csv("data/srps.csv")
+nobel <- read_csv("data/NobelPeace.csv", locale=locale(encoding = "UTF-8"))
+nobnsr <- read_csv("data/srps.csv")
 ```
 
 ## Viewing your tibble corpus
@@ -325,6 +324,18 @@ nobel %>%
   mutate(decade = (Year %/% 10) * 10) %>% 
   group_by(decade) %>%
   summarize(n())
+```
+
+As we spoke about in the workshop, another way we could think to divide up the time periods is periods prior to the Cold War, the Cold War, and after. This we can do with the tidy command ``case_when``.
+```{r}
+nobel %>%
+  mutate(period = case_when(
+    Year <= 1945 ~ "Pre-cold war",
+    Year > 1945 & Year <= 1991 ~ "Cold War",
+    Year > 1991 ~ "Post-cold war",
+  )) %>%
+  group_by(period) %>%
+  summarize(mean(wc))
 ```
 
 This also gives us all the tools we need to do google-style n-gram plots (there are many ways to do this of course). We count the number of words in the texts, group by year, and then plot.

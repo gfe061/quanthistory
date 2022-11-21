@@ -550,7 +550,7 @@ Rstudio’s quite cool cloud service at <a href="https://rstudio.cloud"
 class="uri">https://rstudio.cloud</a>. We can upload documents there,
 install the packages we need on then download the resulting dataframe we
 build there.</p>
-<p>Let’s take a historical <a href="data/stmeld8_kongo.pdf">Storting
+<p>Let’s take a historical <a href="data/stmeld8_kongo.pdf">Stortings
 melding</a>. The front page looks like this.</p>
 <div class="figure" style="text-align: center">
 <img src="data/st_meld.jpg" alt="Clear machine-readable text but in columns." width="395" />
@@ -623,7 +623,7 @@ perfection.</p>
 <p>R has “bindings” (packages that give access to) tessaract, which is
 an open source Google OCR project. Below is an example using pdftools to
 do this from .pdf (see the Tessaract <a
-href="vignette">https://cran.r-project.org/web/packages/tesseract/vignettes/intro.html</a>
+href="https://cran.r-project.org/web/packages/tesseract/vignettes/intro.html">vignette</a>
 for an example of how to do this for .jpg files using the R package
 <code>magick</code>.)</p>
 <p>The way OCR works is that the algorithms are made to “learn” by
@@ -632,9 +632,9 @@ ingesting a large amount of data for which the right answers are known
 algorithms trained to recognize English are included in the package,
 anything else has to be downloaded by hand as shown below (to find you
 needed language’s three letter code, see the <a
-href="tessdata">https://github.com/tesseract-ocr/tessdata</a> github
+href="https://github.com/tesseract-ocr/tessdata">tessdata</a> github
 repository and especially the list of available languages <a
-href="here">https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html</a>).</p>
+href="https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html">here</a>).</p>
 <p>Here is an example from my archive photos, a document form the
 Norwegian Riksarkivet in Oslo.</p>
 <p><img src="data/doc_norsk.jpg" width="50%" /></p>
@@ -684,9 +684,8 @@ companies.</p>
 href="data/NobelPeace.csv">here</a> and the oil company sustainability
 reports <a href="data/srps.csv">here</a>. First let’s read them into
 R.</p>
-<pre class="r"><code>nobel &lt;- read_csv(&quot;data/NobelPeace.csv&quot;, locale=locale(encoding = &quot;latin1&quot;)) %&gt;%
-  select(!...1)
-sr &lt;- read_csv(&quot;data/srps.csv&quot;)</code></pre>
+<pre class="r"><code>nobel &lt;- read_csv(&quot;data/NobelPeace.csv&quot;, locale=locale(encoding = &quot;UTF-8&quot;))
+nobnsr &lt;- read_csv(&quot;data/srps.csv&quot;)</code></pre>
 <div id="viewing-your-tibble-corpus" class="section level2"
 number="2.1">
 <h2><span class="header-section-number">2.1</span> Viewing your tibble
@@ -704,7 +703,7 @@ to make printing and viewing dataframes easier. If we want to print all
 rows (you have to be careful with this, if you have millions of rows
 this will probably crash R) we can do this.</p>
 <pre class="r"><code>nobel # note that this tells you the datatype of each column</code></pre>
-<pre><code>## # A tibble: 92 × 3
+<pre><code>## # A tibble: 94 × 3
 ##     Year Laureate                                                 AwardSpeech   
 ##    &lt;dbl&gt; &lt;chr&gt;                                                    &lt;chr&gt;         
 ##  1  1905 Bertha von Suttner                                       &quot;  On behalf …
@@ -717,10 +716,10 @@ this will probably crash R) we can do this.</p>
 ##  8  1912 Elihu Root                                               &quot;Elihu Root w…
 ##  9  1913 Henri La Fontaine                                        &quot;Henri La Fon…
 ## 10  1922 Fridtjof Nansen                                          &quot;I take pleas…
-## # … with 82 more rows
+## # … with 84 more rows
 ## # ℹ Use `print(n = ...)` to see more rows</code></pre>
 <pre class="r"><code>print(nobel, n = Inf)</code></pre>
-<pre><code>## # A tibble: 92 × 3
+<pre><code>## # A tibble: 94 × 3
 ##     Year Laureate                                                        Award…¹
 ##    &lt;dbl&gt; &lt;chr&gt;                                                           &lt;chr&gt;  
 ##  1  1905 Bertha von Suttner                                              &quot;  On …
@@ -743,7 +742,7 @@ this will probably crash R) we can do this.</p>
 ## 18  1934 Arthur Henderson                                                &quot;It is…
 ## 19  1935 Carl von Ossietzky                                              &quot;Carl …
 ## 20  1936 Carlos Saavedra Lamas                                           &quot;The N…
-## 21  1937 Robert Cecil                                                    &quot;Three…
+## 21  1937 Robert Cecil, Viscount Cecil of Chelwood                        &quot;Three…
 ## 22  1938 Nansen International Office for Refugees                        &quot;This …
 ## 23  1944 International Committee of the Red Cross                        &quot;  Six…
 ## 24  1945 Cordell Hull                                                    &quot;Corde…
@@ -789,13 +788,13 @@ this will probably crash R) we can do this.</p>
 ## 64  1991 Aung San Suu Kyi                                                &quot;Your …
 ## 65  1992 Rigoberta Menchú Tum                                            &quot;Your …
 ## 66  1993 Nelson Mandela, F.W. de Klerk                                   &quot;Your …
-## 67  1994 Yasser Arafat, Shimon Peres, Yitzhak Rabin                      &quot;Your …
-## 68  1995 Joseph Rotblat, Pugwash Conferences on Science and World Affai… &quot;Your …
+## 67  1994 Yasser Arafat, Shimon Peres, Yitzhak Rabin                      &quot;Franc…
+## 68  1995 Joseph Rotblat, Pugwash Conferences on Science and World Affai… &quot;Franc…
 ## 69  1996 Carlos Filipe Ximenes Belo, José Ramos-Horta                    &quot;Trans…
 ## 70  1997 International Campaign to Ban Landmines, Jody Williams          &quot;Trans…
 ## 71  1998 John Hume, David Trimble                                        &quot;Trans…
-## 72  1999 Médecins Sans Frontières                                        &quot;Trans…
-## 73  2000 Kim Dae-jung                                                    &quot;  Tra…
+## 72  1999 Doctors Without Borders                                         &quot;Trans…
+## 73  2000 Kim Dae-jung                                                    &quot;Trans…
 ## 74  2001 United Nations, Kofi Annan                                      &quot;  Tra…
 ## 75  2002 Jimmy Carter                                                    &quot;Trans…
 ## 76  2003 Shirin Ebadi                                                    &quot;Trans…
@@ -807,14 +806,16 @@ this will probably crash R) we can do this.</p>
 ## 82  2009 Barack H. Obama                                                 &quot;© THE…
 ## 83  2010 Liu Xiaobo                                                      &quot;Your …
 ## 84  2011 Ellen Johnson Sirleaf, Leymah Gbowee, Tawakkol Karman           &quot;Your …
-## 85  2012 European Union (EU)                                             &quot;Your …
+## 85  2012 European Union                                                  &quot;Your …
 ## 86  2013 Organisation for the Prohibition of Chemical Weapons            &quot;Your …
 ## 87  2014 Kailash Satyarthi, Malala Yousafzai                             &quot;Norwe…
 ## 88  2015 National Dialogue Quartet                                       &quot;Your …
 ## 89  2016 Juan Manuel Santos                                              &quot;Norwe…
-## 90  2017 International Campaign to Abolish Nuclear Weapons (ICAN)        &quot;Norwe…
-## 91  2018 Denis Mukwege, Nadia Murad                                      &quot;Norwe…
+## 90  2017 International Campaign to Abolish Nuclear Weapons               &quot;Norwe…
+## 91  2018 Denis Mukwege, Nadia Murad                                      &quot;Berit…
 ## 92  2019 Abiy Ahmed Ali                                                  &quot;Your …
+## 93  2020 World Food Programme                                            &quot;Prese…
+## 94  2021 Maria Ressa, Dmitry Muratov                                     &quot;Prese…
 ## # … with abbreviated variable name ¹​AwardSpeech</code></pre>
 <p>Other options are <code>glimpse()</code> (tidyverse) and
 <code>str()</code> (baseR) that give you different ways to visualize a
@@ -826,9 +827,9 @@ formatting tags in the text – it will look nicer but you might want to
 know where the /n and /t tags (newline and tab markers) are.</p>
 <pre class="r"><code>#View(nobel) # opens a new window
 nobel$AwardSpeech[4] # will show the fourth line of the text column of the nobel dataframe</code></pre>
-<pre><code>## [1] &quot;On behalf of the Nobel Committee of the Norwegian Parliament, I have the honor to extend a welcome to all who have assembled here on this occasion commemorating the great Swedish patron and benefactor, Alfred Nobel, who gave the whole of his large fortune to the solution of problems concerning the future fate of mankind. Since we last met here, one of the winners of the Peace Prize, Randal Cremer, has left us forever1; but he has left behind the memory of a great personality and of a warm friend of peace and of mankind. I invite you all to honor his memory by standing. This year the Nobel Committee has unanimously decided to divide the Peace Prize between former member of the Swedish Parliament, K.P. Arnoldson, and former member of the Danish Parliament, Fredrik Bajer. It is a great pleasure for the Committee to award the prize to these gentlemen, since it is convinced that its choice accords with the general desire in the Scandinavian countries. They have both been untiring advocates of the ideals of peace. K.P. Arnoldson was born in Gothenburg in 1844 and in his youth was in the service of the Swedish Railways. At the same time, however, he also worked for the press as a journalist and author, one of his favorite subjects even then being the cause of peace. From 1882 to 1887 Arnoldson was a member of the Lower House of the Swedish Parliament; In 1883 he put forward a proposal for an address to the king, petitioning for a declaration of permanent neutrality by Sweden. The proposal was not adopted, but the House recommended that the government should continue to work along the lines of the proposal. In the same year Arnoldson helped to found the Swedish Peace and Arbitration Association [Svenska freds-och skiljedomsföreningen], which recently celebrated its twenty-fifth anniversary. Arnoldson was secretary of the association for the first few years and edited its paper. Arnoldson\u0092s work also extended to Norway. The success of his speeches in several of our cities in 1889 and 1890 indirectly encouraged Parliament in 1890 to adopt his arbitration address to the king. Arnoldson has published a number of important works on peace, several of which have been translated into other languages. His most important is The Hope of the Centuries: A Book on World Peace, an account of the growth of the idea of peace among nations and in international relations. Mr. Arnoldson, along with Mr. Fredrik Bajer, was nominated for the Nobel Peace Prize this year with the unanimous support of the Swedish Interparliamentary Group and a number of Norwegian members of Parliament.      *  *  * Fredrik Bajer was born in 1837. Like Tolstoy and many other fighters for peace, he began his career as an officer and from 1856 to 1865 was a lieutenant of Dragoons. He then began his study of foreign languages, becoming an elementary school teacher and later a translator. Already in the 1860\u0092s he was maintaining contact with the peace movement and was in touch with Frédéric Passy, who in 1867 founded the first French peace society1. From 1872 to 1895, Bajer was a member of Parliament for Horsens and during that time did much work for the cause of peace and for women\u0092s rights. Mr. Bajer has been an extraordinarily prolific writer, and in his many articles and pamphlets about and in favor of the cause of peace, he has dealt with practically all the problems involved in the peace movement. Norwegian newspapers have also enjoyed the benefit of his able pen. Special mention should be made of his great study of the question of neutrality. In 1882 he was also responsible for the foundation of a peace society in Denmark, at first called the Society for the Promotion of Danish Neutrality and later the Danish Peace Society2. At a very early date Mr. Bajer took an active part in the European peace movement. In 1884 he participated in the International Congress in Bern and in 1889 he took part both in the International Congress and in the Interparliamentary Conference, held during the Great Exhibition in Paris; since then there have been few of these meetings in which he has not participated. It was at his instigation and suggestion that in 1891 a permanent International Peace Bureau was established in Bern. Bajer was president of its Board of Administration until last year when he declined reelection and was instead named honorary president. Since 1891 Bajer has also had a seat on the council which controls the Interparliamentary Union. He has always shown a great interest in cooperation between the Nordic countries in the cause of peace. He has invariably taken part in the Nordic peace meetings, and it is mainly due to his efforts that a Nordic Interparliamentary Union has been founded3. Fredrik Bajer was nominated this year as a candidate for the Nobel Peace Prize by the Danish Interparliamentary Group, among others, and, together with K.P. Arnoldson, by the Swedish Interparliamentary Group and a number of members of the Norwegian Parliament.&quot;</code></pre>
+<pre><code>## [1] &quot;On behalf of the Nobel Committee of the Norwegian Parliament, I have the honor to extend a welcome to all who have assembled here on this occasion commemorating the great Swedish patron and benefactor, Alfred Nobel, who gave the whole of his large fortune to the solution of problems concerning the future fate of mankind. Since we last met here, one of the winners of the Peace Prize, Randal Cremer, has left us forever1; but he has left behind the memory of a great personality and of a warm friend of peace and of mankind. I invite you all to honor his memory by standing. This year the Nobel Committee has unanimously decided to divide the Peace Prize between former member of the Swedish Parliament, K.P. Arnoldson, and former member of the Danish Parliament, Fredrik Bajer. It is a great pleasure for the Committee to award the prize to these gentlemen, since it is convinced that its choice accords with the general desire in the Scandinavian countries. They have both been untiring advocates of the ideals of peace. K.P. Arnoldson was born in Gothenburg in 1844 and in his youth was in the service of the Swedish Railways. At the same time, however, he also worked for the press as a journalist and author, one of his favorite subjects even then being the cause of peace. From 1882 to 1887 Arnoldson was a member of the Lower House of the Swedish Parliament; In 1883 he put forward a proposal for an address to the king, petitioning for a declaration of permanent neutrality by Sweden. The proposal was not adopted, but the House recommended that the government should continue to work along the lines of the proposal. In the same year Arnoldson helped to found the Swedish Peace and Arbitration Association [Svenska freds-och skiljedomsföreningen], which recently celebrated its twenty-fifth anniversary. Arnoldson was secretary of the association for the first few years and edited its paper. Arnoldson’s work also extended to Norway. The success of his speeches in several of our cities in 1889 and 1890 indirectly encouraged Parliament in 1890 to adopt his arbitration address to the king. Arnoldson has published a number of important works on peace, several of which have been translated into other languages. His most important is The Hope of the Centuries: A Book on World Peace, an account of the growth of the idea of peace among nations and in international relations. Mr. Arnoldson, along with Mr. Fredrik Bajer, was nominated for the Nobel Peace Prize this year with the unanimous support of the Swedish Interparliamentary Group and a number of Norwegian members of Parliament.    * * * Fredrik Bajer was born in 1837. Like Tolstoy and many other fighters for peace, he began his career as an officer and from 1856 to 1865 was a lieutenant of Dragoons. He then began his study of foreign languages, becoming an elementary school teacher and later a translator. Already in the 1860’s he was maintaining contact with the peace movement and was in touch with Frédéric Passy, who in 1867 founded the first French peace society1. From 1872 to 1895, Bajer was a member of Parliament for Horsens and during that time did much work for the cause of peace and for women’s rights. Mr. Bajer has been an extraordinarily prolific writer, and in his many articles and pamphlets about and in favor of the cause of peace, he has dealt with practically all the problems involved in the peace movement. Norwegian newspapers have also enjoyed the benefit of his able pen. Special mention should be made of his great study of the question of neutrality. In 1882 he was also responsible for the foundation of a peace society in Denmark, at first called the Society for the Promotion of Danish Neutrality and later the Danish Peace Society2. At a very early date Mr. Bajer took an active part in the European peace movement. In 1884 he participated in the International Congress in Bern and in 1889 he took part both in the International Congress and in the Interparliamentary Conference, held during the Great Exhibition in Paris; since then there have been few of these meetings in which he has not participated. It was at his instigation and suggestion that in 1891 a permanent International Peace Bureau was established in Bern. Bajer was president of its Board of Administration until last year when he declined reelection and was instead named honorary president. Since 1891 Bajer has also had a seat on the council which controls the Interparliamentary Union. He has always shown a great interest in cooperation between the Nordic countries in the cause of peace. He has invariably taken part in the Nordic peace meetings, and it is mainly due to his efforts that a Nordic Interparliamentary Union has been founded3. Fredrik Bajer was nominated this year as a candidate for the Nobel Peace Prize by the Danish Interparliamentary Group, among others, and, together with K.P. Arnoldson, by the Swedish Interparliamentary Group and a number of members of the Norwegian Parliament.&quot;</code></pre>
 <pre class="r"><code>cat(nobel$AwardSpeech[4]) # nicer formatting but now you&#39;re not seeing formatting tags in the text</code></pre>
-<pre><code>## On behalf of the Nobel Committee of the Norwegian Parliament, I have the honor to extend a welcome to all who have assembled here on this occasion commemorating the great Swedish patron and benefactor, Alfred Nobel, who gave the whole of his large fortune to the solution of problems concerning the future fate of mankind. Since we last met here, one of the winners of the Peace Prize, Randal Cremer, has left us forever1; but he has left behind the memory of a great personality and of a warm friend of peace and of mankind. I invite you all to honor his memory by standing. This year the Nobel Committee has unanimously decided to divide the Peace Prize between former member of the Swedish Parliament, K.P. Arnoldson, and former member of the Danish Parliament, Fredrik Bajer. It is a great pleasure for the Committee to award the prize to these gentlemen, since it is convinced that its choice accords with the general desire in the Scandinavian countries. They have both been untiring advocates of the ideals of peace. K.P. Arnoldson was born in Gothenburg in 1844 and in his youth was in the service of the Swedish Railways. At the same time, however, he also worked for the press as a journalist and author, one of his favorite subjects even then being the cause of peace. From 1882 to 1887 Arnoldson was a member of the Lower House of the Swedish Parliament; In 1883 he put forward a proposal for an address to the king, petitioning for a declaration of permanent neutrality by Sweden. The proposal was not adopted, but the House recommended that the government should continue to work along the lines of the proposal. In the same year Arnoldson helped to found the Swedish Peace and Arbitration Association [Svenska freds-och skiljedomsföreningen], which recently celebrated its twenty-fifth anniversary. Arnoldson was secretary of the association for the first few years and edited its paper. Arnoldsons work also extended to Norway. The success of his speeches in several of our cities in 1889 and 1890 indirectly encouraged Parliament in 1890 to adopt his arbitration address to the king. Arnoldson has published a number of important works on peace, several of which have been translated into other languages. His most important is The Hope of the Centuries: A Book on World Peace, an account of the growth of the idea of peace among nations and in international relations. Mr. Arnoldson, along with Mr. Fredrik Bajer, was nominated for the Nobel Peace Prize this year with the unanimous support of the Swedish Interparliamentary Group and a number of Norwegian members of Parliament.      *  *  * Fredrik Bajer was born in 1837. Like Tolstoy and many other fighters for peace, he began his career as an officer and from 1856 to 1865 was a lieutenant of Dragoons. He then began his study of foreign languages, becoming an elementary school teacher and later a translator. Already in the 1860s he was maintaining contact with the peace movement and was in touch with Frédéric Passy, who in 1867 founded the first French peace society1. From 1872 to 1895, Bajer was a member of Parliament for Horsens and during that time did much work for the cause of peace and for womens rights. Mr. Bajer has been an extraordinarily prolific writer, and in his many articles and pamphlets about and in favor of the cause of peace, he has dealt with practically all the problems involved in the peace movement. Norwegian newspapers have also enjoyed the benefit of his able pen. Special mention should be made of his great study of the question of neutrality. In 1882 he was also responsible for the foundation of a peace society in Denmark, at first called the Society for the Promotion of Danish Neutrality and later the Danish Peace Society2. At a very early date Mr. Bajer took an active part in the European peace movement. In 1884 he participated in the International Congress in Bern and in 1889 he took part both in the International Congress and in the Interparliamentary Conference, held during the Great Exhibition in Paris; since then there have been few of these meetings in which he has not participated. It was at his instigation and suggestion that in 1891 a permanent International Peace Bureau was established in Bern. Bajer was president of its Board of Administration until last year when he declined reelection and was instead named honorary president. Since 1891 Bajer has also had a seat on the council which controls the Interparliamentary Union. He has always shown a great interest in cooperation between the Nordic countries in the cause of peace. He has invariably taken part in the Nordic peace meetings, and it is mainly due to his efforts that a Nordic Interparliamentary Union has been founded3. Fredrik Bajer was nominated this year as a candidate for the Nobel Peace Prize by the Danish Interparliamentary Group, among others, and, together with K.P. Arnoldson, by the Swedish Interparliamentary Group and a number of members of the Norwegian Parliament.</code></pre>
+<pre><code>## On behalf of the Nobel Committee of the Norwegian Parliament, I have the honor to extend a welcome to all who have assembled here on this occasion commemorating the great Swedish patron and benefactor, Alfred Nobel, who gave the whole of his large fortune to the solution of problems concerning the future fate of mankind. Since we last met here, one of the winners of the Peace Prize, Randal Cremer, has left us forever1; but he has left behind the memory of a great personality and of a warm friend of peace and of mankind. I invite you all to honor his memory by standing. This year the Nobel Committee has unanimously decided to divide the Peace Prize between former member of the Swedish Parliament, K.P. Arnoldson, and former member of the Danish Parliament, Fredrik Bajer. It is a great pleasure for the Committee to award the prize to these gentlemen, since it is convinced that its choice accords with the general desire in the Scandinavian countries. They have both been untiring advocates of the ideals of peace. K.P. Arnoldson was born in Gothenburg in 1844 and in his youth was in the service of the Swedish Railways. At the same time, however, he also worked for the press as a journalist and author, one of his favorite subjects even then being the cause of peace. From 1882 to 1887 Arnoldson was a member of the Lower House of the Swedish Parliament; In 1883 he put forward a proposal for an address to the king, petitioning for a declaration of permanent neutrality by Sweden. The proposal was not adopted, but the House recommended that the government should continue to work along the lines of the proposal. In the same year Arnoldson helped to found the Swedish Peace and Arbitration Association [Svenska freds-och skiljedomsföreningen], which recently celebrated its twenty-fifth anniversary. Arnoldson was secretary of the association for the first few years and edited its paper. Arnoldson’s work also extended to Norway. The success of his speeches in several of our cities in 1889 and 1890 indirectly encouraged Parliament in 1890 to adopt his arbitration address to the king. Arnoldson has published a number of important works on peace, several of which have been translated into other languages. His most important is The Hope of the Centuries: A Book on World Peace, an account of the growth of the idea of peace among nations and in international relations. Mr. Arnoldson, along with Mr. Fredrik Bajer, was nominated for the Nobel Peace Prize this year with the unanimous support of the Swedish Interparliamentary Group and a number of Norwegian members of Parliament.    * * * Fredrik Bajer was born in 1837. Like Tolstoy and many other fighters for peace, he began his career as an officer and from 1856 to 1865 was a lieutenant of Dragoons. He then began his study of foreign languages, becoming an elementary school teacher and later a translator. Already in the 1860’s he was maintaining contact with the peace movement and was in touch with Frédéric Passy, who in 1867 founded the first French peace society1. From 1872 to 1895, Bajer was a member of Parliament for Horsens and during that time did much work for the cause of peace and for women’s rights. Mr. Bajer has been an extraordinarily prolific writer, and in his many articles and pamphlets about and in favor of the cause of peace, he has dealt with practically all the problems involved in the peace movement. Norwegian newspapers have also enjoyed the benefit of his able pen. Special mention should be made of his great study of the question of neutrality. In 1882 he was also responsible for the foundation of a peace society in Denmark, at first called the Society for the Promotion of Danish Neutrality and later the Danish Peace Society2. At a very early date Mr. Bajer took an active part in the European peace movement. In 1884 he participated in the International Congress in Bern and in 1889 he took part both in the International Congress and in the Interparliamentary Conference, held during the Great Exhibition in Paris; since then there have been few of these meetings in which he has not participated. It was at his instigation and suggestion that in 1891 a permanent International Peace Bureau was established in Bern. Bajer was president of its Board of Administration until last year when he declined reelection and was instead named honorary president. Since 1891 Bajer has also had a seat on the council which controls the Interparliamentary Union. He has always shown a great interest in cooperation between the Nordic countries in the cause of peace. He has invariably taken part in the Nordic peace meetings, and it is mainly due to his efforts that a Nordic Interparliamentary Union has been founded3. Fredrik Bajer was nominated this year as a candidate for the Nobel Peace Prize by the Danish Interparliamentary Group, among others, and, together with K.P. Arnoldson, by the Swedish Interparliamentary Group and a number of members of the Norwegian Parliament.</code></pre>
 </div>
 <div id="white-spaces-urls-tags-etc." class="section level2"
 number="2.2">
@@ -857,7 +858,7 @@ and utilize our knowledge of regular expressions (the stringr <a
 href="https://stringr.tidyverse.org/">documentation</a> and cheatsheet
 are especially helpful).</p>
 <pre class="r"><code># Practice on our small test string
-test &lt;- &quot;     Here \n there and \t\t\t everywhere.\n&quot;
+test &lt;- &quot;     Here \n there and \t\t\t everywhere.\n         &quot;
 test_clean &lt;- str_replace_all(test, &quot;[(\\n)(\\r)(\\t)]&quot;, &#39; &#39;)
 test_clean &lt;- str_replace_all(test_clean, &quot; {2,}&quot;, &quot; &quot;)
 test_clean &lt;- str_replace_all(test_clean, &quot;^ *| *$&quot;, &quot;&quot;)
@@ -869,18 +870,20 @@ much easier for us.</p>
 <pre class="r"><code>str_squish(test) </code></pre>
 <pre><code>## [1] &quot;Here there and everywhere.&quot;</code></pre>
 <p>So that was simple. Now the unicode encodings from the Nobel
-speaches.</p>
+speeches.</p>
 <pre class="r"><code>speech &lt;- nobel$AwardSpeech[1]
-str_replace(speech, &quot;\u0092&quot;, &quot;&#39;&quot;)</code></pre>
-<pre><code>## [1] &quot;  On behalf of the Nobel Committee, Bjørnstjerne Bjørnson introduced the speaker, Baroness Bertha von Suttner, to the audience. In a few words he recalled the great influence of the Baroness on the growth of the peace movement. While still young she had had the audacity to oppose the horrors of war1, and had done so in one of the most militaristic countries in Europe. She had continued this fight all her life and never wearied of crying \u0093Down with Arms\u00932. Despite the laughter with which her words had been greeted in the beginning, they did receive a hearing because they were uttered by a person of noble character and because they proclaimed humanity&#39;s greatest cause. Many women had since followed in her footsteps and taken up the cause, and the call to lay down arms had become general. Moreover, to all men of goodwill the cause of peace and the women\u0092s cause were one and the same movement, striving for the same goal. When the cause of peace prevailed, then too would the women\u0092s cause be won. * * * History constantly demonstrates the great influence of women. Women have encouraged the ideas of war, the attitude to life, and the causes for which men have fought, for which their sons were brought up, and of which they have dreamed. Any change or reformation of these ideas must be brought about chiefly by women. The human ideal of manly courage and manly deeds must become more enlightened; the faithful worker in all spiritual and material spheres of life must displace the bloodstained hero as the true ideal. Women will cooperate to give men higher aims, to give their sons nobler dreams. Many are the individual women who have set an example in sacrifice and work, who have followed the armies as angels of consolation and healing, tending the sick and suffering. How much more effective it is to do one\u0092s utmost to prevent misfortune! This is where you, Madame Baroness, have taken the lead among women of today. You have attacked war itself and cried to the nations: \u0093Down with arms!\u0094 This call will be your eternal honor. Beginning as a murmur in the corn on a summer\u0092s day\r\nAnd growing to a gale through the tops of the forest,\r\nTill the ocean bears it on with tenderous voice,\r\nAnd nothing is heard but this.1 These stirring words of our great poet apply to your call to action, Madame Baroness. It began as a murmur through the lovely meadow of the Danube Valley2 , that old highway for the devastating armies of war. We already hear it in the forests in all parts of the world and soon, we hope, its voice, borne by the oceans of people, will permanently drown the sound of war drums and trumpets. This will take a long time, some will say. We do not know. And it makes no difference to our work. Our task is clear: to combat any act of violence, any war of aggression, and so render even the justifiable defensive war unnecessary. We shall rouse the conscience of man, put justice and morality in the place of war. We thank you, Madame Baroness, for your firm faith, for your hope and self-sacrifice, for your work. We too, in the lands of the North, women as well as men, need you to light and nourish the flame of faith and work. Good luck to you! Frédèric Passy, that venerable apostle of peace3 has called you, Madame Baroness, our general-in-chief. The friends of peace in Scandinavia applaud this salute.&quot;</code></pre>
-<!-- Well, that should have worked, but didn't. In fact, when we search for that escaped unicode character, regex is actually searching for the character itself, not the code. So we have to double escape it. Which is R means 3 backslashes. One final change that is usually made is to make all letters lowercase so as to make word searches easier. -->
+str_replace_all(speech, &quot;\u0092&quot;, &quot;&#39;&quot;)</code></pre>
+<pre><code>## [1] &quot;  On behalf of the Nobel Committee, Bjørnstjerne Bjørnson introduced the speaker, Baroness Bertha von Suttner, to the audience. In a few words he recalled the great influence of the Baroness on the growth of the peace movement. While still young she had had the audacity to oppose the horrors of war1, and had done so in one of the most militaristic countries in Europe. She had continued this fight all her life and never wearied of crying “Down with Arms“2. Despite the laughter with which her words had been greeted in the beginning, they did receive a hearing because they were uttered by a person of noble character and because they proclaimed humanity’s greatest cause. Many women had since followed in her footsteps and taken up the cause, and the call to lay down arms had become general. Moreover, to all men of goodwill the cause of peace and the women’s cause were one and the same movement, striving for the same goal. When the cause of peace prevailed, then too would the women’s cause be won. * * * History constantly demonstrates the great influence of women. Women have encouraged the ideas of war, the attitude to life, and the causes for which men have fought, for which their sons were brought up, and of which they have dreamed. Any change or reformation of these ideas must be brought about chiefly by women. The human ideal of manly courage and manly deeds must become more enlightened; the faithful worker in all spiritual and material spheres of life must displace the bloodstained hero as the true ideal. Women will cooperate to give men higher aims, to give their sons nobler dreams. Many are the individual women who have set an example in sacrifice and work, who have followed the armies as angels of consolation and healing, tending the sick and suffering. How much more effective it is to do one’s utmost to prevent misfortune! This is where you, Madame Baroness, have taken the lead among women of today. You have attacked war itself and cried to the nations: “Down with arms!” This call will be your eternal honor. Beginning as a murmur in the corn on a summer’s day\nAnd growing to a gale through the tops of the forest,\nTill the ocean bears it on with tenderous voice,\nAnd nothing is heard but this.1 These stirring words of our great poet apply to your call to action, Madame Baroness. It began as a murmur through the lovely meadow of the Danube Valley2 , that old highway for the devastating armies of war. We already hear it in the forests in all parts of the world and soon, we hope, its voice, borne by the oceans of people, will permanently drown the sound of war drums and trumpets. This will take a long time, some will say. We do not know. And it makes no difference to our work. Our task is clear: to combat any act of violence, any war of aggression, and so render even the justifiable defensive war unnecessary. We shall rouse the conscience of man, put justice and morality in the place of war. We thank you, Madame Baroness, for your firm faith, for your hope and self-sacrifice, for your work. We too, in the lands of the North, women as well as men, need you to light and nourish the flame of faith and work. Good luck to you! Frédèric Passy, that venerable apostle of peace3 has called you, Madame Baroness, our general-in-chief. The friends of peace in Scandinavia applaud this salute.&quot;</code></pre>
 <pre class="r"><code>speech %&gt;%
   str_replace_all(&quot;\u0092&quot;, &quot;&#39;&quot;) %&gt;%
-  str_replace_all(&quot;(\u0093)|(\u0094)&quot;, &#39;&quot;&#39;) %&gt;%
+  str_replace_all(&quot;(\u0093)|(\u0094)&quot;, &quot;&#39;&quot;) %&gt;%
+  str_replace_all(&quot;[0-9]\\.&quot;, &quot;.&quot;) %&gt;%
   str_squish() %&gt;%
-  str_to_lower() %&gt;% # make all letters lower case
-  writeLines()</code></pre>
-<pre><code>## on behalf of the nobel committee, bjørnstjerne bjørnson introduced the speaker, baroness bertha von suttner, to the audience. in a few words he recalled the great influence of the baroness on the growth of the peace movement. while still young she had had the audacity to oppose the horrors of war1, and had done so in one of the most militaristic countries in europe. she had continued this fight all her life and never wearied of crying &quot;down with arms&quot;2. despite the laughter with which her words had been greeted in the beginning, they did receive a hearing because they were uttered by a person of noble character and because they proclaimed humanity&#39;s greatest cause. many women had since followed in her footsteps and taken up the cause, and the call to lay down arms had become general. moreover, to all men of goodwill the cause of peace and the women&#39;s cause were one and the same movement, striving for the same goal. when the cause of peace prevailed, then too would the women&#39;s cause be won. * * * history constantly demonstrates the great influence of women. women have encouraged the ideas of war, the attitude to life, and the causes for which men have fought, for which their sons were brought up, and of which they have dreamed. any change or reformation of these ideas must be brought about chiefly by women. the human ideal of manly courage and manly deeds must become more enlightened; the faithful worker in all spiritual and material spheres of life must displace the bloodstained hero as the true ideal. women will cooperate to give men higher aims, to give their sons nobler dreams. many are the individual women who have set an example in sacrifice and work, who have followed the armies as angels of consolation and healing, tending the sick and suffering. how much more effective it is to do one&#39;s utmost to prevent misfortune! this is where you, madame baroness, have taken the lead among women of today. you have attacked war itself and cried to the nations: &quot;down with arms!&quot; this call will be your eternal honor. beginning as a murmur in the corn on a summer&#39;s day and growing to a gale through the tops of the forest, till the ocean bears it on with tenderous voice, and nothing is heard but this.1 these stirring words of our great poet apply to your call to action, madame baroness. it began as a murmur through the lovely meadow of the danube valley2 , that old highway for the devastating armies of war. we already hear it in the forests in all parts of the world and soon, we hope, its voice, borne by the oceans of people, will permanently drown the sound of war drums and trumpets. this will take a long time, some will say. we do not know. and it makes no difference to our work. our task is clear: to combat any act of violence, any war of aggression, and so render even the justifiable defensive war unnecessary. we shall rouse the conscience of man, put justice and morality in the place of war. we thank you, madame baroness, for your firm faith, for your hope and self-sacrifice, for your work. we too, in the lands of the north, women as well as men, need you to light and nourish the flame of faith and work. good luck to you! frédèric passy, that venerable apostle of peace3 has called you, madame baroness, our general-in-chief. the friends of peace in scandinavia applaud this salute.</code></pre>
+  str_to_lower()</code></pre>
+<pre><code>## [1] &quot;on behalf of the nobel committee, bjørnstjerne bjørnson introduced the speaker, baroness bertha von suttner, to the audience. in a few words he recalled the great influence of the baroness on the growth of the peace movement. while still young she had had the audacity to oppose the horrors of war1, and had done so in one of the most militaristic countries in europe. she had continued this fight all her life and never wearied of crying “down with arms“. despite the laughter with which her words had been greeted in the beginning, they did receive a hearing because they were uttered by a person of noble character and because they proclaimed humanity’s greatest cause. many women had since followed in her footsteps and taken up the cause, and the call to lay down arms had become general. moreover, to all men of goodwill the cause of peace and the women’s cause were one and the same movement, striving for the same goal. when the cause of peace prevailed, then too would the women’s cause be won. * * * history constantly demonstrates the great influence of women. women have encouraged the ideas of war, the attitude to life, and the causes for which men have fought, for which their sons were brought up, and of which they have dreamed. any change or reformation of these ideas must be brought about chiefly by women. the human ideal of manly courage and manly deeds must become more enlightened; the faithful worker in all spiritual and material spheres of life must displace the bloodstained hero as the true ideal. women will cooperate to give men higher aims, to give their sons nobler dreams. many are the individual women who have set an example in sacrifice and work, who have followed the armies as angels of consolation and healing, tending the sick and suffering. how much more effective it is to do one’s utmost to prevent misfortune! this is where you, madame baroness, have taken the lead among women of today. you have attacked war itself and cried to the nations: “down with arms!” this call will be your eternal honor. beginning as a murmur in the corn on a summer’s day and growing to a gale through the tops of the forest, till the ocean bears it on with tenderous voice, and nothing is heard but this.1 these stirring words of our great poet apply to your call to action, madame baroness. it began as a murmur through the lovely meadow of the danube valley2 , that old highway for the devastating armies of war. we already hear it in the forests in all parts of the world and soon, we hope, its voice, borne by the oceans of people, will permanently drown the sound of war drums and trumpets. this will take a long time, some will say. we do not know. and it makes no difference to our work. our task is clear: to combat any act of violence, any war of aggression, and so render even the justifiable defensive war unnecessary. we shall rouse the conscience of man, put justice and morality in the place of war. we thank you, madame baroness, for your firm faith, for your hope and self-sacrifice, for your work. we too, in the lands of the north, women as well as men, need you to light and nourish the flame of faith and work. good luck to you! frédèric passy, that venerable apostle of peace3 has called you, madame baroness, our general-in-chief. the friends of peace in scandinavia applaud this salute.&quot;</code></pre>
+<p>(Backslashes, especially, are confusing. For a quick refresher on
+regex in R, take a look at the quick tidyverse <a
+href="https://stringr.tidyverse.org/articles/regular-expressions.html#escaping">overview</a>.)</p>
 <p>That looks pretty clean just as text. For most of our text analysis
 we’re actually going to remove all punctuation, but there is an argument
 to be made for getting as clean an original text as you can to start out
@@ -904,20 +907,20 @@ well)</p>
   mutate(clean_text = str_replace_all(clean_text, &quot;(\u0093)|(\u0094)&quot;, &#39;&quot;&#39;)) %&gt;%
   mutate(clean_text = str_to_lower(clean_text)) %&gt;%
   mutate(clean_text = str_squish(clean_text)))</code></pre>
-<pre><code>## # A tibble: 92 × 4
+<pre><code>## # A tibble: 94 × 4
 ##     Year Laureate                                                Award…¹ clean…²
 ##    &lt;dbl&gt; &lt;chr&gt;                                                   &lt;chr&gt;   &lt;chr&gt;  
-##  1  1905 Bertha von Suttner                                      &quot;  On … &quot;on be…
-##  2  1906 Theodore Roosevelt                                      &quot;As th… &quot;as th…
-##  3  1907 Ernesto Teodoro Moneta, Louis Renault                   &quot;Ernes… &quot;ernes…
-##  4  1908 Klas Pontus Arnoldson, Fredrik Bajer                    &quot;On be… &quot;on be…
-##  5  1909 Auguste Beernaert, Paul Henri d&#39;Estournelles de Consta… &quot;Augus… &quot;augus…
-##  6  1910 Permanent International Peace Bureau                    &quot;Chair… &quot;chair…
-##  7  1911 Tobias Asser, Alfred Fried                              &quot;Tobia… &quot;tobia…
-##  8  1912 Elihu Root                                              &quot;Elihu… &quot;elihu…
-##  9  1913 Henri La Fontaine                                       &quot;Henri… &quot;henri…
-## 10  1922 Fridtjof Nansen                                         &quot;I tak… &quot;i tak…
-## # … with 82 more rows, and abbreviated variable names ¹​AwardSpeech, ²​clean_text
+##  1  1905 Bertha von Suttner                                      &quot;  On … on beh…
+##  2  1906 Theodore Roosevelt                                      &quot;As th… as the…
+##  3  1907 Ernesto Teodoro Moneta, Louis Renault                   &quot;Ernes… ernest…
+##  4  1908 Klas Pontus Arnoldson, Fredrik Bajer                    &quot;On be… on beh…
+##  5  1909 Auguste Beernaert, Paul Henri d&#39;Estournelles de Consta… &quot;Augus… august…
+##  6  1910 Permanent International Peace Bureau                    &quot;Chair… chairm…
+##  7  1911 Tobias Asser, Alfred Fried                              &quot;Tobia… tobias…
+##  8  1912 Elihu Root                                              &quot;Elihu… elihu …
+##  9  1913 Henri La Fontaine                                       &quot;Henri… henri …
+## 10  1922 Fridtjof Nansen                                         &quot;I tak… i take…
+## # … with 84 more rows, and abbreviated variable names ¹​AwardSpeech, ²​clean_text
 ## # ℹ Use `print(n = ...)` to see more rows</code></pre>
 <p>We can compare AwardSpeech with text columns,
 <code>nobel$clean_text</code> does indeed look cleaner.</p>
@@ -929,13 +932,13 @@ write_rds(nobel, &quot;data/nobel_cleaned.Rds&quot;)</code></pre>
 href="https://www.princeton.edu/~mlovett/reference/Regular-Expressions.pdf"
 class="uri">https://www.princeton.edu/~mlovett/reference/Regular-Expressions.pdf</a>
 - <span class="citation">Wickham and Grolemund (2016)</span>, chapter
-14. -</p>
+14.</p>
 </div>
 <div id="excercises" class="section level2" number="2.3">
 <h2><span class="header-section-number">2.3</span> Excercises</h2>
 <ul>
 <li>Look at other excess text in the Nobel corpus. How can we write code
-to cut these peices out?</li>
+to cut these pieces out?</li>
 <li>Are the problems the same with the SR report corpus? Take a look and
 see if we can run the same code or we need to do different things to
 clean that corpus.</li>
@@ -958,16 +961,16 @@ filter.</p>
 <pre><code>## # A tibble: 26 × 3
 ##     Year Laureate                                                    AwardSpeech
 ##    &lt;dbl&gt; &lt;chr&gt;                                                       &lt;chr&gt;      
-##  1  1950 Ralph Bunche                                                &quot;dr. ralph…
-##  2  1951 Léon Jouhaux                                                &quot;alfred no…
-##  3  1952 Albert Schweitzer                                           &quot;albert sc…
-##  4  1953 George C. Marshall                                          &quot;when cade…
-##  5  1954 Office of the United Nations High Commissioner for Refugees &quot;the nobel…
-##  6  1957 Lester Bowles Pearson                                       &quot;the nobel…
-##  7  1958 Georges Pire                                                &quot;the nobel…
-##  8  1959 Philip Noel-Baker                                           &quot;frequentl…
-##  9  1960 Albert Lutuli                                               &quot;this year…
-## 10  1961 Dag Hammarskjöld                                            &quot;the nobel…
+##  1  1950 Ralph Bunche                                                dr. ralph …
+##  2  1951 Léon Jouhaux                                                alfred nob…
+##  3  1952 Albert Schweitzer                                           albert sch…
+##  4  1953 George C. Marshall                                          when cadet…
+##  5  1954 Office of the United Nations High Commissioner for Refugees the nobel …
+##  6  1957 Lester Bowles Pearson                                       the nobel …
+##  7  1958 Georges Pire                                                the nobel …
+##  8  1959 Philip Noel-Baker                                           frequently…
+##  9  1960 Albert Lutuli                                               this year …
+## 10  1961 Dag Hammarskjöld                                            the nobel …
 ## # … with 16 more rows
 ## # ℹ Use `print(n = ...)` to see more rows</code></pre>
 <p>Here we’ve said to filter the corpus based on rows where Year is
@@ -981,20 +984,20 @@ nobel %&gt;%
 us whether the year was before WWII or after.</p>
 <pre class="r"><code>nobel %&gt;%
   mutate(after_WWII = Year &gt; 1945)</code></pre>
-<pre><code>## # A tibble: 92 × 4
+<pre><code>## # A tibble: 94 × 4
 ##     Year Laureate                                                Award…¹ after…²
 ##    &lt;dbl&gt; &lt;chr&gt;                                                   &lt;chr&gt;   &lt;lgl&gt;  
-##  1  1905 Bertha von Suttner                                      &quot;on be… FALSE  
-##  2  1906 Theodore Roosevelt                                      &quot;as th… FALSE  
-##  3  1907 Ernesto Teodoro Moneta, Louis Renault                   &quot;ernes… FALSE  
-##  4  1908 Klas Pontus Arnoldson, Fredrik Bajer                    &quot;on be… FALSE  
-##  5  1909 Auguste Beernaert, Paul Henri d&#39;Estournelles de Consta… &quot;augus… FALSE  
-##  6  1910 Permanent International Peace Bureau                    &quot;chair… FALSE  
-##  7  1911 Tobias Asser, Alfred Fried                              &quot;tobia… FALSE  
-##  8  1912 Elihu Root                                              &quot;elihu… FALSE  
-##  9  1913 Henri La Fontaine                                       &quot;henri… FALSE  
-## 10  1922 Fridtjof Nansen                                         &quot;i tak… FALSE  
-## # … with 82 more rows, and abbreviated variable names ¹​AwardSpeech, ²​after_WWII
+##  1  1905 Bertha von Suttner                                      on beh… FALSE  
+##  2  1906 Theodore Roosevelt                                      as the… FALSE  
+##  3  1907 Ernesto Teodoro Moneta, Louis Renault                   ernest… FALSE  
+##  4  1908 Klas Pontus Arnoldson, Fredrik Bajer                    on beh… FALSE  
+##  5  1909 Auguste Beernaert, Paul Henri d&#39;Estournelles de Consta… august… FALSE  
+##  6  1910 Permanent International Peace Bureau                    chairm… FALSE  
+##  7  1911 Tobias Asser, Alfred Fried                              tobias… FALSE  
+##  8  1912 Elihu Root                                              elihu … FALSE  
+##  9  1913 Henri La Fontaine                                       henri … FALSE  
+## 10  1922 Fridtjof Nansen                                         i take… FALSE  
+## # … with 84 more rows, and abbreviated variable names ¹​AwardSpeech, ²​after_WWII
 ## # ℹ Use `print(n = ...)` to see more rows</code></pre>
 <p>One thing I often do is use <code>mutate</code> to do word counts of
 every document row, essentially by counting all clusters of words or
@@ -1017,13 +1020,13 @@ entire Nobel corpus? And average word count?</p>
 <pre><code>## # A tibble: 1 × 1
 ##   average
 ##     &lt;int&gt;
-## 1  236021</code></pre>
+## 1  237441</code></pre>
 <pre class="r"><code>nobel %&gt;%
   summarize(average = mean(wc))</code></pre>
 <pre><code>## # A tibble: 1 × 1
 ##   average
 ##     &lt;dbl&gt;
-## 1   2565.</code></pre>
+## 1   2526.</code></pre>
 <p>Where summarize really shines though is if we have groups. Let’s
 split our corpus up by decade and then we’ll get average word counts by
 decade using the <code>group_by</code> function.</p>
@@ -1031,7 +1034,7 @@ decade using the <code>group_by</code> function.</p>
   mutate(decade = (Year %/% 10) * 10) %&gt;% # uses something called modulo division to get the decade
   group_by(decade) %&gt;%
   summarize(mean(wc))</code></pre>
-<pre><code>## # A tibble: 12 × 2
+<pre><code>## # A tibble: 13 × 2
 ##    decade `mean(wc)`
 ##     &lt;dbl&gt;      &lt;dbl&gt;
 ##  1   1900       713 
@@ -1043,9 +1046,10 @@ decade using the <code>group_by</code> function.</p>
 ##  7   1960      3288.
 ##  8   1970      3087 
 ##  9   1980      2948.
-## 10   1990      1874.
+## 10   1990      1879.
 ## 11   2000      2517.
-## 12   2010      2084.</code></pre>
+## 12   2010      2085.
+## 13   2020       681</code></pre>
 <p><code>summarize</code> also has a <code>n()</code> function that can
 be helpful telling us how many observations per group we have. There
 were alot of years without a Nobel Peace Prize so this might be
@@ -1054,7 +1058,7 @@ interesting to look at.</p>
   mutate(decade = (Year %/% 10) * 10) %&gt;% 
   group_by(decade) %&gt;%
   summarize(n())</code></pre>
-<pre><code>## # A tibble: 12 × 2
+<pre><code>## # A tibble: 13 × 2
 ##    decade `n()`
 ##     &lt;dbl&gt; &lt;int&gt;
 ##  1   1900     5
@@ -1068,7 +1072,26 @@ interesting to look at.</p>
 ##  9   1980    10
 ## 10   1990    10
 ## 11   2000    10
-## 12   2010    10</code></pre>
+## 12   2010    10
+## 13   2020     2</code></pre>
+<p>As we spoke about in the workshop, another way we could think to
+divide up the time periods is periods prior to the Cold War, the Cold
+War, and after. This we can do with the tidy command
+<code>case_when</code>.</p>
+<pre class="r"><code>nobel %&gt;%
+  mutate(period = case_when(
+    Year &lt;= 1945 ~ &quot;Pre-cold war&quot;,
+    Year &gt; 1945 &amp; Year &lt;= 1991 ~ &quot;Cold War&quot;,
+    Year &gt; 1991 ~ &quot;Post-cold war&quot;,
+  )) %&gt;%
+  group_by(period) %&gt;%
+  summarize(mean(wc))</code></pre>
+<pre><code>## # A tibble: 3 × 2
+##   period        `mean(wc)`
+##   &lt;chr&gt;              &lt;dbl&gt;
+## 1 Cold War           3228.
+## 2 Post-cold war      2056.
+## 3 Pre-cold war       1942.</code></pre>
 <p>This also gives us all the tools we need to do google-style n-gram
 plots (there are many ways to do this of course). We count the number of
 words in the texts, group by year, and then plot.</p>
@@ -1081,7 +1104,7 @@ words in the texts, group by year, and then plot.</p>
   pivot_longer(c(&quot;peace&quot;, &quot;war&quot;, &quot;human_rights&quot;), names_to = &quot;word&quot;, values_to = &quot;counts&quot;) %&gt;%
   ggplot(aes(x = Year, y = counts, color = word)) +
     geom_line()</code></pre>
-<p><img src="1_2-readingcleaning_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p><img src="1_2-readingcleaning_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
 <div id="excercises-1" class="section level2" number="3.1">
 <h2><span class="header-section-number">3.1</span> Excercises</h2>
 <ul>
