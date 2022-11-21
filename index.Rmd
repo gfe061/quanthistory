@@ -67,4 +67,6 @@ install.packages("devtools")
 devtools::install_github("bmschmidt/wordVectors")
 ```
 
+If you have problems installing ``tabulizer``, see [these](https://github.com/ropensci/tabulizer) other options and troubleshooting techniques.
+
 # References and Sources
