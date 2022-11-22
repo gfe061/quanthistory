@@ -7,16 +7,29 @@ library(stopwords)
 library(SnowballC)
 library(widyr)
 
+rm(list=ls())
+
+setwd("P:/Work/Stellen/Innlandet/2022/Quantifying history")
+nobel <- read_rds("nobel_cleaned.Rds")
+
 ## Tidy data
 
+#### from yesterday
+nobel %>%
+  mutate(peace = str_count(AwardSpeech, "[Pp]eace")) %>%
+  mutate(thankyou = str_count(AwardSpeech, "[Th]ank you")) %>%
+  mutate(war = str_count(AwardSpeech, "[Ww]ar")) %>%
+  ggplot() +
+  geom_line(aes(x = Year, y = peace, color = "green")) +
+  geom_line(aes(x = Year, y = thankyou, color = "blue")) +
+  geom_line(aes(x = Year, y = war, color = "red"))
+
+# better way
 nobel %>%
   mutate(peace = str_count(AwardSpeech, "[Pp]eace")) %>%
   mutate(war = str_count(AwardSpeech, "[Ww]ar")) %>%
   mutate(thankyou = str_count(AwardSpeech, "[Tt]ank [Yy]ou")) %>%
-  # ggplot() +
-  # geom_line(aes(x = Year, y = peace), color = "green") +
-  # geom_line(aes(x = Year, y = thankyou), color = "blue") +
-  # geom_line(aes(x = Year, y = war), color = "red")
+  ggplot() +
   pivot_longer(c("peace", "war", "thankyou"), names_to = "word", values_to = "counts") %>%
   ggplot(aes(x = Year, y = counts, color = word)) +
   geom_line()
