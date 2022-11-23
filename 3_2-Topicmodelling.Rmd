@@ -13,7 +13,7 @@ bibliography: textanalysis.bib
 klippy::klippy(position = c('top', 'right'))
 ```
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE, results='hide'}
 library(tidyverse)
 library(tidytext)
 library(stm)
@@ -158,11 +158,11 @@ There are several packages in R that fit topic models, most notably ``stm`` whic
 ```{r, echo=FALSE, out.width="70%"}
 knitr::include_graphics("data/stm.png")
 ```
-See (@roberts2019stm).
+@roberts2019stm.
 
 Here's a brief example of how we can use ``quanteda`` to create a document-feature matrix and then throw that into ``stm``.
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE, results='hide'}
 nobel <- read_rds("nobel_cleaned.Rds")
 nobel_decade <- nobel %>%
   mutate(decade = Year %/% 10 * 10) %>%
@@ -178,7 +178,7 @@ plot(fit10)
 
 This shows us the ten topics we requested it find and the expected proportions. The topics dominate individual documents it looks like, making this perhaps not the best example, but one we'll do just to show the mechanics of ``stm``.
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE, results='hide'}
 nobel_periods <- nobel %>%
   #mutate(decade = Year %/% 10 * 10) %>%
   mutate(Period = ifelse(Year <= 1945, "Pre-WWII", "Post-WWII")) %>%
@@ -201,7 +201,7 @@ plot(fit10_period, type = "perspectives", topics = 9)
 - Run a topic model on the sustainability report corpus. How can we deal with year variables when they are not the name of the document?
 - Experiment more with the Nobel corpus. Can you find a better/more meaningful model fit? 
 
-# Other topic modeling resources
+## Other topic modeling resources
 
 This is only the most basic of introductions to topic modeling. For more information on topic modeling and analysis in the tidyverse, see chapter 6 of @silge2017text. 
 

@@ -450,39 +450,13 @@ div.tocify {
   addClassKlippyTo("pre.r, pre.markdown");
   addKlippy('right', 'top', 'auto', '1', 'Copy code', 'Copied!');
 </script>
-<p>Libraries used.</p>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-## ✔ ggplot2 3.3.6     ✔ purrr   0.3.4
-## ✔ tibble  3.1.8     ✔ dplyr   1.0.9
-## ✔ tidyr   1.2.0     ✔ stringr 1.4.0
-## ✔ readr   2.1.2     ✔ forcats 0.5.1
-## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>library(tidytext)
-library(stm)</code></pre>
-<pre><code>## stm v1.3.6 successfully loaded. See ?stm for help. 
-##  Papers, resources, and other materials at structuraltopicmodel.com</code></pre>
-<pre class="r"><code>library(topicmodels)</code></pre>
-<pre><code>## Warning: package &#39;topicmodels&#39; was built under R version 4.2.2</code></pre>
-<pre class="r"><code>library(quanteda)</code></pre>
-<pre><code>## Warning in .recacheSubclasses(def@className, def, env): undefined subclass
-## &quot;unpackedMatrix&quot; of class &quot;mMatrix&quot;; definition not updated</code></pre>
-<pre><code>## Warning in .recacheSubclasses(def@className, def, env): undefined subclass
-## &quot;unpackedMatrix&quot; of class &quot;replValueSp&quot;; definition not updated</code></pre>
-<pre><code>## Package version: 3.2.3
-## Unicode version: 13.0
-## ICU version: 69.1
-## Parallel computing: 8 of 8 threads used.
-## See https://quanteda.io for tutorials and examples.</code></pre>
-<pre class="r"><code>library(quanteda.textstats)</code></pre>
-<pre><code>## Warning in .recacheSubclasses(def@className, def, env): undefined subclass
-## &quot;unpackedMatrix&quot; of class &quot;mMatrix&quot;; definition not updated
-
-## Warning in .recacheSubclasses(def@className, def, env): undefined subclass
-## &quot;unpackedMatrix&quot; of class &quot;replValueSp&quot;; definition not updated</code></pre>
-<pre class="r"><code>library(quanteda.textplots)</code></pre>
+<pre class="r"><code>library(tidyverse)
+library(tidytext)
+library(stm)
+library(topicmodels)
+library(quanteda)
+library(quanteda.textstats)
+library(quanteda.textplots)</code></pre>
 <p>Today’s script is <a
 href="data/script_wednesday_text.R">here</a>.</p>
 <div id="reading-into-topic-modeling-packages-topicmodels"
@@ -572,11 +546,11 @@ href="Presentations/Topic_models.pdf">pdf</a> for details).</p>
 distributions.</p>
 <pre class="r"><code>str(posterior(nobel_tm))</code></pre>
 <pre><code>## List of 2
-##  $ terms : num [1:15, 1:8435] 2.29e-04 1.04e-10 4.12e-04 1.32e-04 6.73e-04 ...
+##  $ terms : num [1:15, 1:8435] 4.69e-04 4.68e-306 1.04e-04 1.64e-02 7.46e-04 ...
 ##   ..- attr(*, &quot;dimnames&quot;)=List of 2
 ##   .. ..$ : chr [1:15] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
 ##   .. ..$ : chr [1:8435] &quot;refuge&quot; &quot;nuclear&quot; &quot;weapon&quot; &quot;war&quot; ...
-##  $ topics: num [1:94, 1:15] 6.40e-06 9.11e-06 9.22e-06 6.97e-06 6.97e-06 ...
+##  $ topics: num [1:94, 1:15] 7.02e-06 9.99e-06 1.01e-05 7.64e-06 7.64e-06 ...
 ##   ..- attr(*, &quot;dimnames&quot;)=List of 2
 ##   .. ..$ : chr [1:94] &quot;1981&quot; &quot;2017&quot; &quot;1954&quot; &quot;1925&quot; ...
 ##   .. ..$ : chr [1:15] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...</code></pre>
@@ -595,54 +569,54 @@ think of as proportions. So what do we do with this?</p>
 <p>The most useful thing to look at straight away are the highest words
 in each topic – do the topics make sense to a human?</p>
 <pre class="r"><code>terms(nobel_tm, 15)</code></pre>
-<pre><code>##       Topic 1      Topic 2    Topic 3    Topic 4     Topic 5   Topic 6   
-##  [1,] &quot;peac&quot;       &quot;nation&quot;   &quot;peac&quot;     &quot;peac&quot;      &quot;peac&quot;    &quot;war&quot;     
-##  [2,] &quot;countri&quot;    &quot;unit&quot;     &quot;nation&quot;   &quot;nation&quot;    &quot;countri&quot; &quot;peac&quot;    
-##  [3,] &quot;nobel&quot;      &quot;nuclear&quot;  &quot;war&quot;      &quot;world&quot;     &quot;right&quot;   &quot;quaker&quot;  
-##  [4,] &quot;world&quot;      &quot;paul&quot;     &quot;unit&quot;     &quot;war&quot;       &quot;declar&quot;  &quot;american&quot;
-##  [5,] &quot;prize&quot;      &quot;war&quot;      &quot;world&quot;    &quot;countri&quot;   &quot;war&quot;     &quot;nation&quot;  
-##  [6,] &quot;wheat&quot;      &quot;peac&quot;     &quot;countri&quot;  &quot;time&quot;      &quot;peopl&quot;   &quot;confer&quot;  
-##  [7,] &quot;nation&quot;     &quot;test&quot;     &quot;marshal&quot;  &quot;intern&quot;    &quot;prize&quot;   &quot;world&quot;   
-##  [8,] &quot;develop&quot;    &quot;intern&quot;   &quot;unicef&quot;   &quot;organ&quot;     &quot;nation&quot;  &quot;unit&quot;    
-##  [9,] &quot;dr&quot;         &quot;american&quot; &quot;prize&quot;    &quot;peopl&quot;     &quot;world&quot;   &quot;time&quot;    
-## [10,] &quot;borlaug&quot;    &quot;leagu&quot;    &quot;children&quot; &quot;right&quot;     &quot;nobel&quot;   &quot;hull&quot;    
-## [11,] &quot;award&quot;      &quot;countri&quot;  &quot;peopl&quot;    &quot;africa&quot;    &quot;ilo&quot;     &quot;intern&quot;  
-## [12,] &quot;committe&quot;   &quot;linu&quot;     &quot;organ&quot;    &quot;govern&quot;    &quot;develop&quot; &quot;countri&quot; 
-## [13,] &quot;women&quot;      &quot;weapon&quot;   &quot;word&quot;     &quot;south&quot;     &quot;organ&quot;   &quot;polit&quot;   
-## [14,] &quot;agricultur&quot; &quot;world&quot;    &quot;spirit&quot;   &quot;christian&quot; &quot;human&quot;   &quot;polici&quot;  
-## [15,] &quot;peopl&quot;      &quot;time&quot;     &quot;nobel&quot;    &quot;unit&quot;      &quot;social&quot;  &quot;europ&quot;   
-##       Topic 7    Topic 8   Topic 9     Topic 10   Topic 11     Topic 12  
-##  [1,] &quot;refuge&quot;   &quot;nation&quot;  &quot;peac&quot;      &quot;peac&quot;     &quot;life&quot;       &quot;war&quot;     
-##  [2,] &quot;peac&quot;     &quot;leagu&quot;   &quot;countri&quot;   &quot;intern&quot;   &quot;noel&quot;       &quot;nation&quot;  
-##  [3,] &quot;countri&quot;  &quot;war&quot;     &quot;human&quot;     &quot;war&quot;      &quot;baker&quot;      &quot;peac&quot;    
-##  [4,] &quot;world&quot;    &quot;peac&quot;    &quot;nation&quot;    &quot;nation&quot;   &quot;war&quot;        &quot;committe&quot;
-##  [5,] &quot;war&quot;      &quot;polit&quot;   &quot;world&quot;     &quot;organ&quot;    &quot;world&quot;      &quot;world&quot;   
-##  [6,] &quot;prize&quot;    &quot;intern&quot;  &quot;prize&quot;     &quot;time&quot;     &quot;time&quot;       &quot;intern&quot;  
-##  [7,] &quot;nation&quot;   &quot;govern&quot;  &quot;nobel&quot;     &quot;world&quot;    &quot;nation&quot;     &quot;red&quot;     
-##  [8,] &quot;nobel&quot;    &quot;time&quot;    &quot;peopl&quot;     &quot;movement&quot; &quot;schweitzer&quot; &quot;leagu&quot;   
-##  [9,] &quot;offic&quot;    &quot;nansen&quot;  &quot;intern&quot;    &quot;bunch&quot;    &quot;aung&quot;       &quot;cross&quot;   
-## [10,] &quot;human&quot;    &quot;cecil&quot;   &quot;ahtisaari&quot; &quot;confer&quot;   &quot;san&quot;        &quot;europ&quot;   
-## [11,] &quot;peopl&quot;    &quot;countri&quot; &quot;prison&quot;    &quot;countri&quot;  &quot;peac&quot;       &quot;time&quot;    
-## [12,] &quot;award&quot;    &quot;prize&quot;   &quot;war&quot;       &quot;french&quot;   &quot;live&quot;       &quot;countri&quot; 
-## [13,] &quot;committe&quot; &quot;kim&quot;     &quot;south&quot;     &quot;life&quot;     &quot;disarma&quot;    &quot;pearson&quot; 
-## [14,] &quot;right&quot;    &quot;organ&quot;   &quot;white&quot;     &quot;jouhaux&quot;  &quot;suu&quot;        &quot;lester&quot;  
-## [15,] &quot;unit&quot;     &quot;europ&quot;   &quot;life&quot;      &quot;franc&quot;    &quot;person&quot;     &quot;power&quot;   
-##       Topic 13   Topic 14   Topic 15   
-##  [1,] &quot;nuclear&quot;  &quot;peac&quot;     &quot;peac&quot;     
-##  [2,] &quot;weapon&quot;   &quot;women&quot;    &quot;prize&quot;    
-##  [3,] &quot;peac&quot;     &quot;prize&quot;    &quot;nobel&quot;    
-##  [4,] &quot;world&quot;    &quot;peopl&quot;    &quot;human&quot;    
-##  [5,] &quot;war&quot;      &quot;human&quot;    &quot;world&quot;    
-##  [6,] &quot;prize&quot;    &quot;world&quot;    &quot;right&quot;    
-##  [7,] &quot;nobel&quot;    &quot;nobel&quot;    &quot;award&quot;    
-##  [8,] &quot;intern&quot;   &quot;war&quot;      &quot;peopl&quot;    
-##  [9,] &quot;arm&quot;      &quot;committe&quot; &quot;committe&quot; 
-## [10,] &quot;award&quot;    &quot;award&quot;    &quot;presid&quot;   
-## [11,] &quot;nation&quot;   &quot;countri&quot;  &quot;time&quot;     
-## [12,] &quot;committe&quot; &quot;right&quot;    &quot;polit&quot;    
-## [13,] &quot;disarma&quot;  &quot;nation&quot;   &quot;war&quot;      
-## [14,] &quot;unit&quot;     &quot;life&quot;     &quot;conflict&quot; 
-## [15,] &quot;power&quot;    &quot;mother&quot;   &quot;norwegian&quot;</code></pre>
+<pre><code>##       Topic 1   Topic 2     Topic 3   Topic 4    Topic 5     Topic 6    
+##  [1,] &quot;peac&quot;    &quot;peac&quot;      &quot;peac&quot;    &quot;peac&quot;     &quot;peac&quot;      &quot;peac&quot;     
+##  [2,] &quot;countri&quot; &quot;nuclear&quot;   &quot;nation&quot;  &quot;war&quot;      &quot;countri&quot;   &quot;world&quot;    
+##  [3,] &quot;right&quot;   &quot;weapon&quot;    &quot;war&quot;     &quot;refuge&quot;   &quot;war&quot;       &quot;prize&quot;    
+##  [4,] &quot;nation&quot;  &quot;world&quot;     &quot;world&quot;   &quot;intern&quot;   &quot;world&quot;     &quot;women&quot;    
+##  [5,] &quot;human&quot;   &quot;war&quot;       &quot;countri&quot; &quot;organ&quot;    &quot;ilo&quot;       &quot;nobel&quot;    
+##  [6,] &quot;declar&quot;  &quot;intern&quot;    &quot;unit&quot;    &quot;countri&quot;  &quot;prize&quot;     &quot;countri&quot;  
+##  [7,] &quot;peopl&quot;   &quot;human&quot;     &quot;intern&quot;  &quot;quaker&quot;   &quot;nobel&quot;     &quot;human&quot;    
+##  [8,] &quot;south&quot;   &quot;peopl&quot;     &quot;time&quot;    &quot;women&quot;    &quot;intern&quot;    &quot;peopl&quot;    
+##  [9,] &quot;unicef&quot;  &quot;prize&quot;     &quot;confer&quot;  &quot;nation&quot;   &quot;nation&quot;    &quot;develop&quot;  
+## [10,] &quot;world&quot;   &quot;nation&quot;    &quot;polici&quot;  &quot;peopl&quot;    &quot;peopl&quot;     &quot;right&quot;    
+## [11,] &quot;develop&quot; &quot;agreement&quot; &quot;presid&quot;  &quot;offic&quot;    &quot;govern&quot;    &quot;committe&quot; 
+## [12,] &quot;african&quot; &quot;paul&quot;      &quot;pearson&quot; &quot;life&quot;     &quot;organ&quot;     &quot;wheat&quot;    
+## [13,] &quot;freedom&quot; &quot;power&quot;     &quot;prize&quot;   &quot;movement&quot; &quot;human&quot;     &quot;nation&quot;   
+## [14,] &quot;organ&quot;   &quot;time&quot;      &quot;lester&quot;  &quot;baker&quot;    &quot;agreement&quot; &quot;polit&quot;    
+## [15,] &quot;white&quot;   &quot;test&quot;      &quot;econom&quot;  &quot;unit&quot;     &quot;develop&quot;   &quot;norwegian&quot;
+##       Topic 7   Topic 8   Topic 9     Topic 10   Topic 11   Topic 12      
+##  [1,] &quot;war&quot;     &quot;refuge&quot;  &quot;peac&quot;      &quot;war&quot;      &quot;peac&quot;     &quot;nation&quot;      
+##  [2,] &quot;nation&quot;  &quot;war&quot;     &quot;nobel&quot;     &quot;peac&quot;     &quot;human&quot;    &quot;peac&quot;        
+##  [3,] &quot;peac&quot;    &quot;countri&quot; &quot;prize&quot;     &quot;nation&quot;   &quot;prize&quot;    &quot;american&quot;    
+##  [4,] &quot;time&quot;    &quot;nation&quot;  &quot;peopl&quot;     &quot;unit&quot;     &quot;peopl&quot;    &quot;unit&quot;        
+##  [5,] &quot;life&quot;    &quot;offic&quot;   &quot;norwegian&quot; &quot;world&quot;    &quot;nobel&quot;    &quot;congo&quot;       
+##  [6,] &quot;world&quot;   &quot;marshal&quot; &quot;nation&quot;    &quot;intern&quot;   &quot;world&quot;    &quot;war&quot;         
+##  [7,] &quot;leagu&quot;   &quot;peac&quot;    &quot;award&quot;     &quot;organ&quot;    &quot;polit&quot;    &quot;kim&quot;         
+##  [8,] &quot;europ&quot;   &quot;world&quot;   &quot;parti&quot;     &quot;committe&quot; &quot;award&quot;    &quot;intern&quot;      
+##  [9,] &quot;germani&quot; &quot;nansen&quot;  &quot;process&quot;   &quot;red&quot;      &quot;san&quot;      &quot;hammarskjöld&quot;
+## [10,] &quot;peopl&quot;   &quot;peopl&quot;   &quot;conflict&quot;  &quot;cross&quot;    &quot;committe&quot; &quot;secretari&quot;   
+## [11,] &quot;polici&quot;  &quot;prize&quot;   &quot;countri&quot;   &quot;countri&quot;  &quot;mother&quot;   &quot;aid&quot;         
+## [12,] &quot;bunch&quot;   &quot;time&quot;    &quot;committe&quot;  &quot;leagu&quot;    &quot;right&quot;    &quot;pact&quot;        
+## [13,] &quot;countri&quot; &quot;govern&quot;  &quot;ahtisaari&quot; &quot;prize&quot;    &quot;life&quot;     &quot;polit&quot;       
+## [14,] &quot;franc&quot;   &quot;award&quot;   &quot;war&quot;       &quot;american&quot; &quot;respect&quot;  &quot;countri&quot;     
+## [15,] &quot;power&quot;   &quot;polit&quot;   &quot;polit&quot;     &quot;confer&quot;   &quot;person&quot;   &quot;lama&quot;        
+##       Topic 13  Topic 14    Topic 15   
+##  [1,] &quot;leagu&quot;   &quot;peac&quot;      &quot;nuclear&quot;  
+##  [2,] &quot;nation&quot;  &quot;prize&quot;     &quot;peac&quot;     
+##  [3,] &quot;war&quot;     &quot;nobel&quot;     &quot;weapon&quot;   
+##  [4,] &quot;peac&quot;    &quot;world&quot;     &quot;prize&quot;    
+##  [5,] &quot;disarma&quot; &quot;right&quot;     &quot;nobel&quot;    
+##  [6,] &quot;intern&quot;  &quot;human&quot;     &quot;intern&quot;   
+##  [7,] &quot;time&quot;    &quot;peopl&quot;     &quot;award&quot;    
+##  [8,] &quot;world&quot;   &quot;award&quot;     &quot;world&quot;    
+##  [9,] &quot;public&quot;  &quot;countri&quot;   &quot;war&quot;      
+## [10,] &quot;govern&quot;  &quot;committe&quot;  &quot;committe&quot; 
+## [11,] &quot;cecil&quot;   &quot;war&quot;       &quot;presid&quot;   
+## [12,] &quot;british&quot; &quot;time&quot;      &quot;disarma&quot;  
+## [13,] &quot;organ&quot;   &quot;norwegian&quot; &quot;countri&quot;  
+## [14,] &quot;speech&quot;  &quot;nation&quot;    &quot;carter&quot;   
+## [15,] &quot;freedom&quot; &quot;laureat&quot;   &quot;norwegian&quot;</code></pre>
 <p>We can, of course, work directly with these data structures but per
 our approach in this workshop, we’re going to tidy our results and take
 the data interpretation and visualization back to the tidyverse where we
@@ -678,16 +652,16 @@ topics_in_documents</code></pre>
 <pre><code>## # A tibble: 1,410 × 3
 ##    document topic      gamma
 ##    &lt;chr&gt;    &lt;int&gt;      &lt;dbl&gt;
-##  1 1981         1 0.00000640
-##  2 2017         1 0.00000911
-##  3 1954         1 0.00000922
-##  4 1925         1 0.00000697
-##  5 1926         1 0.00000697
-##  6 1968         1 0.00000778
-##  7 2013         1 0.0000130 
-##  8 1988         1 0.0000111 
-##  9 1953         1 0.00000572
-## 10 2016         1 0.0000112 
+##  1 1981         1 0.00000702
+##  2 2017         1 0.00000999
+##  3 1954         1 0.0000101 
+##  4 1925         1 0.00000764
+##  5 1926         1 0.00000764
+##  6 1968         1 1.00      
+##  7 2013         1 0.0000143 
+##  8 1988         1 0.0000121 
+##  9 1953         1 0.00000627
+## 10 2016         1 0.0000123 
 ## # … with 1,400 more rows
 ## # ℹ Use `print(n = ...)` to see more rows</code></pre>
 <p>This tells us the estimated proportion of words in each given
@@ -703,50 +677,50 @@ matrix.</p>
 
 # alternative two, easier for demonstration purposes on a sub-optimally-fit topic model
 (auto_topics &lt;- apply(terms(nobel_tm, 3), 2, paste, collapse = &quot;-&quot;))  # pastes together the top three terms for each topic in the nobel topic model</code></pre>
-<pre><code>##               Topic 1               Topic 2               Topic 3 
-##  &quot;peac-countri-nobel&quot; &quot;nation-unit-nuclear&quot;     &quot;peac-nation-war&quot; 
-##               Topic 4               Topic 5               Topic 6 
-##   &quot;peac-nation-world&quot;  &quot;peac-countri-right&quot;     &quot;war-peac-quaker&quot; 
-##               Topic 7               Topic 8               Topic 9 
-## &quot;refuge-peac-countri&quot;    &quot;nation-leagu-war&quot;  &quot;peac-countri-human&quot; 
-##              Topic 10              Topic 11              Topic 12 
-##     &quot;peac-intern-war&quot;     &quot;life-noel-baker&quot;     &quot;war-nation-peac&quot; 
-##              Topic 13              Topic 14              Topic 15 
-## &quot;nuclear-weapon-peac&quot;    &quot;peac-women-prize&quot;    &quot;peac-prize-nobel&quot;</code></pre>
+<pre><code>##                Topic 1                Topic 2                Topic 3 
+##   &quot;peac-countri-right&quot;  &quot;peac-nuclear-weapon&quot;      &quot;peac-nation-war&quot; 
+##                Topic 4                Topic 5                Topic 6 
+##      &quot;peac-war-refuge&quot;     &quot;peac-countri-war&quot;     &quot;peac-world-prize&quot; 
+##                Topic 7                Topic 8                Topic 9 
+##      &quot;war-nation-peac&quot;   &quot;refuge-war-countri&quot;     &quot;peac-nobel-prize&quot; 
+##               Topic 10               Topic 11               Topic 12 
+##      &quot;war-peac-nation&quot;     &quot;peac-human-prize&quot; &quot;nation-peac-american&quot; 
+##               Topic 13               Topic 14               Topic 15 
+##     &quot;leagu-nation-war&quot;     &quot;peac-prize-nobel&quot;  &quot;nuclear-peac-weapon&quot;</code></pre>
 <pre class="r"><code>(auto_topics &lt;- tibble(old_topic = 1:k, new_topic = auto_topics)) # make as tibble where numeric topics are matched with the auto generated ones</code></pre>
 <pre><code>## # A tibble: 15 × 2
-##    old_topic new_topic          
-##        &lt;int&gt; &lt;chr&gt;              
-##  1         1 peac-countri-nobel 
-##  2         2 nation-unit-nuclear
-##  3         3 peac-nation-war    
-##  4         4 peac-nation-world  
-##  5         5 peac-countri-right 
-##  6         6 war-peac-quaker    
-##  7         7 refuge-peac-countri
-##  8         8 nation-leagu-war   
-##  9         9 peac-countri-human 
-## 10        10 peac-intern-war    
-## 11        11 life-noel-baker    
-## 12        12 war-nation-peac    
-## 13        13 nuclear-weapon-peac
-## 14        14 peac-women-prize   
-## 15        15 peac-prize-nobel</code></pre>
+##    old_topic new_topic           
+##        &lt;int&gt; &lt;chr&gt;               
+##  1         1 peac-countri-right  
+##  2         2 peac-nuclear-weapon 
+##  3         3 peac-nation-war     
+##  4         4 peac-war-refuge     
+##  5         5 peac-countri-war    
+##  6         6 peac-world-prize    
+##  7         7 war-nation-peac     
+##  8         8 refuge-war-countri  
+##  9         9 peac-nobel-prize    
+## 10        10 war-peac-nation     
+## 11        11 peac-human-prize    
+## 12        12 nation-peac-american
+## 13        13 leagu-nation-war    
+## 14        14 peac-prize-nobel    
+## 15        15 nuclear-peac-weapon</code></pre>
 <pre class="r"><code>(topics &lt;- topics_in_documents %&gt;%
   left_join(auto_topics, by=c(&quot;topic&quot; = &quot;old_topic&quot;)))</code></pre>
 <pre><code>## # A tibble: 1,410 × 4
 ##    document topic      gamma new_topic         
 ##    &lt;chr&gt;    &lt;int&gt;      &lt;dbl&gt; &lt;chr&gt;             
-##  1 1981         1 0.00000640 peac-countri-nobel
-##  2 2017         1 0.00000911 peac-countri-nobel
-##  3 1954         1 0.00000922 peac-countri-nobel
-##  4 1925         1 0.00000697 peac-countri-nobel
-##  5 1926         1 0.00000697 peac-countri-nobel
-##  6 1968         1 0.00000778 peac-countri-nobel
-##  7 2013         1 0.0000130  peac-countri-nobel
-##  8 1988         1 0.0000111  peac-countri-nobel
-##  9 1953         1 0.00000572 peac-countri-nobel
-## 10 2016         1 0.0000112  peac-countri-nobel
+##  1 1981         1 0.00000702 peac-countri-right
+##  2 2017         1 0.00000999 peac-countri-right
+##  3 1954         1 0.0000101  peac-countri-right
+##  4 1925         1 0.00000764 peac-countri-right
+##  5 1926         1 0.00000764 peac-countri-right
+##  6 1968         1 1.00       peac-countri-right
+##  7 2013         1 0.0000143  peac-countri-right
+##  8 1988         1 0.0000121  peac-countri-right
+##  9 1953         1 0.00000627 peac-countri-right
+## 10 2016         1 0.0000123  peac-countri-right
 ## # … with 1,400 more rows
 ## # ℹ Use `print(n = ...)` to see more rows</code></pre>
 <p>Now we have our data in a familiar format we can subset and
@@ -780,8 +754,8 @@ topics %&gt;%
 <code>stm</code> which is incorporates a host of handy visualization
 tools as well as the capacity to incorporate covariates into the model
 fit.</p>
-<p><img src="data/stm.png" width="70%" /> See (<span
-class="citation">Roberts, Stewart, and Tingley (2019)</span>).</p>
+<p><img src="data/stm.png" width="70%" /> <span
+class="citation">Roberts, Stewart, and Tingley (2019)</span>.</p>
 <p>Here’s a brief example of how we can use <code>quanteda</code> to
 create a document-feature matrix and then throw that into
 <code>stm</code>.</p>
@@ -794,36 +768,8 @@ nobel_decade &lt;- nobel %&gt;%
   dfm() %&gt;%
   dfm_remove(pattern = stop_words$word) %&gt;%
   dfm_group(groups = decade)
-fit10 &lt;- stm(nobel_decade, K = 10, max.em.its = 5, init.type = &quot;Spectral&quot;)</code></pre>
-<pre><code>## Beginning Spectral Initialization 
-##   Calculating the gram matrix...
-##   Using only 10000 most frequent terms during initialization...
-##   Finding anchor words...
-##      ..........
-##   Recovering initialization...
-##      ....................................................................................................
-## Initialization complete.
-## ............
-## Completed E-Step (0 seconds). 
-## Completed M-Step. 
-## Completing Iteration 1 (approx. per word bound = -7.711) 
-## ............
-## Completed E-Step (0 seconds). 
-## Completed M-Step. 
-## Completing Iteration 2 (approx. per word bound = -7.500, relative change = 2.743e-02) 
-## ............
-## Completed E-Step (0 seconds). 
-## Completed M-Step. 
-## Completing Iteration 3 (approx. per word bound = -7.476, relative change = 3.132e-03) 
-## ............
-## Completed E-Step (0 seconds). 
-## Completed M-Step. 
-## Completing Iteration 4 (approx. per word bound = -7.465, relative change = 1.448e-03) 
-## ............
-## Completed E-Step (0 seconds). 
-## Completed M-Step. 
-## Model Terminated Before Convergence Reached</code></pre>
-<pre class="r"><code>plot(fit10)</code></pre>
+fit10 &lt;- stm(nobel_decade, K = 10, max.em.its = 5, init.type = &quot;Spectral&quot;)
+plot(fit10)</code></pre>
 <p><img src="3_2-Topicmodelling_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <p>This shows us the ten topics we requested it find and the expected
 proportions. The topics dominate individual documents it looks like,
@@ -837,41 +783,8 @@ the mechanics of <code>stm</code>.</p>
   dfm() %&gt;%
   dfm_remove(pattern = stop_words$word)
 # setting EM iterations to 10 for speed -- normally this should be many more (often set at 75)
-fit10_period &lt;- stm(nobel_periods, K = 10, content =~Period, prevalence =~ Period, max.em.its = 5, init.type = &quot;Spectral&quot;)</code></pre>
-<pre><code>## Beginning Spectral Initialization 
-##   Calculating the gram matrix...
-##   Using only 10000 most frequent terms during initialization...
-##   Finding anchor words...
-##      ..........
-##   Recovering initialization...
-##      ....................................................................................................
-## Initialization complete.
-## ............................................................................................
-## Completed E-Step (0 seconds). 
-## ....................................................................................................
-## Completed M-Step (34 seconds). 
-## Completing Iteration 1 (approx. per word bound = -8.017) 
-## ............................................................................................
-## Completed E-Step (0 seconds). 
-## ....................................................................................................
-## Completed M-Step (32 seconds). 
-## Completing Iteration 2 (approx. per word bound = -7.669, relative change = 4.342e-02) 
-## ............................................................................................
-## Completed E-Step (0 seconds). 
-## ....................................................................................................
-## Completed M-Step (37 seconds). 
-## Completing Iteration 3 (approx. per word bound = -7.565, relative change = 1.360e-02) 
-## ............................................................................................
-## Completed E-Step (0 seconds). 
-## ....................................................................................................
-## Completed M-Step (33 seconds). 
-## Completing Iteration 4 (approx. per word bound = -7.518, relative change = 6.230e-03) 
-## ............................................................................................
-## Completed E-Step (0 seconds). 
-## ....................................................................................................
-## Completed M-Step (31 seconds). 
-## Model Terminated Before Convergence Reached</code></pre>
-<pre class="r"><code>plot(fit10_period)</code></pre>
+fit10_period &lt;- stm(nobel_periods, K = 10, content =~Period, prevalence =~ Period, max.em.its = 5, init.type = &quot;Spectral&quot;)
+plot(fit10_period)</code></pre>
 <p><img src="3_2-Topicmodelling_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <p>We have now fitted this topic model with the covariable
 <code>Period</code> denoting pre- or post-WWII and this then allows us
@@ -889,11 +802,10 @@ document?</li>
 meaningful model fit?</li>
 </ul>
 </div>
-</div>
-<div id="other-topic-modeling-resources" class="section level1"
-number="4">
-<h1><span class="header-section-number">4</span> Other topic modeling
-resources</h1>
+<div id="other-topic-modeling-resources" class="section level2"
+number="3.2">
+<h2><span class="header-section-number">3.2</span> Other topic modeling
+resources</h2>
 <p>This is only the most basic of introductions to topic modeling. For
 more information on topic modeling and analysis in the tidyverse, see
 chapter 6 of <span class="citation">Silge and Robinson
@@ -901,8 +813,9 @@ chapter 6 of <span class="citation">Silge and Robinson
 <p>For a good explainer on topic models, see <span
 class="citation">Underwood (2012)</span>.</p>
 </div>
-<div id="cosine-frequency" class="section level1" number="5">
-<h1><span class="header-section-number">5</span> Cosine frequency</h1>
+</div>
+<div id="cosine-frequency" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Cosine frequency</h1>
 <p>Another way to think about differences between documents is cosine
 frequency. If we imagine each document being represented by a vector in
 n-dimensional space, where the values of the vector are the counts (more
@@ -947,9 +860,9 @@ and so on. One way of visualizing distance might be clustering – to take
 all documents (here the documents are each decade’s worth of Nobel award
 speeches) and break them into two clusters based on their Euclidean
 distance, to do it again, and again, and so forth.</p>
-<pre class="r"><code>eu_dist &lt;- textstat_dist(dfm_weight(dfm_small, scheme = &quot;prop&quot;))
+<pre class="r"><code>eu_dist &lt;- textstat_dist(dfm_weight(nobel_decade, scheme = &quot;prop&quot;))
 cluster &lt;- hclust(as.dist(eu_dist))
-cluster$labels &lt;- docnames(dfm_small)
+cluster$labels &lt;- docnames(nobel_decade)
 plot(cluster, xlab = &quot;&quot;, sub = &quot;&quot;, main = &quot;Clustered Euclidean Distance&quot;)</code></pre>
 <p><img src="3_2-Topicmodelling_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 <p>Finally, another way to envision differences between documents is to
