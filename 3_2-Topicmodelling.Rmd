@@ -6,17 +6,30 @@ output:
     toc_depth: 3
     toc_float: true
     number_sections: true
+bibliography: textanalysis.bib
 ---
 
 ```{r klippy, echo=FALSE, include=TRUE}
 klippy::klippy(position = c('top', 'right'))
 ```
 
+```{r, message=FALSE}
+library(tidyverse)
+library(tidytext)
+library(stm)
+library(topicmodels)
+library(quanteda)
+library(quanteda.textstats)
+library(quanteda.textplots)
+```
+
+Today's script is [here](data/script_wednesday_text.R). 
+
 # Reading into topic modeling packages (topicmodels)
 
 There are a number of topic model instantiations in R. We will go through one of the more popular ones -- ``topicmodels`` which plays very nicely with the tidyverse.^[Perhaps the most popular topic modeling package in R has now become ``stm`` -- see [these](https://juliasilge.com/blog/sherlock-holmes-stm/) [nice](https://juliasilge.com/blog/evaluating-stm/) blog posts by Julia Silge for examples of working with ``stm`` through ``tidytext``.] 
 
-``topicmodels``'s main topic model function is ``LDA()``, which stands for Latent Dirichlet Allocation, a type of topic model and often used as shorthand for topic models in general. It takes a DTM as input and gives us an object of class ``LDA`` as output, which we can then analyze and visualize in the tidyverse. There are many points where we can customize, adjust parameters and so on but the one we must specify is the number of topics. This is something that often takes some fiddling with. Unless you have reason to think that the number of topics is extremely limited in a certain corpus one generally uses between ~20-50 topics. The other parameter it makes sense to think of prior to, or under, analysis is document size. As we've seen, a DTM will break up a text without concern for order within indvidual documents. So large documents will be extremely generalized in a DTM. It could well be reasonable to break up books, for example, by chapter. We could go more finer grained as well -- chunking by paragraph might make sense sometimes, too. Much will depend on the corpus and object of analysis. Experiment and see what leads to the most understandable and coherent topics.
+``topicmodels``'s main topic model function is ``LDA()``, which stands for Latent Dirichlet Allocation, a type of topic model and often used as shorthand for topic models in general. It takes a DTM as input and gives us an object of class ``LDA`` as output, which we can then analyze and visualize in the tidyverse. There are many points where we can customize, adjust parameters and so on but the one we must specify is the number of topics. This is something that often takes some fiddling with. Unless you have reason to think that the number of topics is extremely limited in a certain corpus one generally uses between ~20-50 topics. The other parameter it makes sense to think of prior to, or under, analysis is document size. As we've seen, a DTM will break up a text without concern for order within individual documents. So large documents will be extremely generalized in a DTM. It could well be reasonable to break up books, for example, by chapter. We could go more finer grained as well -- chunking by paragraph might make sense sometimes, too. Much will depend on the corpus and object of analysis. Experiment and see what leads to the most understandable and coherent topics.
 
 ```{r, message = FALSE}
 options(stringsAsFactors = FALSE)
@@ -40,7 +53,7 @@ Another parameter it makes sense to think of prior to, or under, analysis is doc
 
 We are also using the corpus that we have already cleaned and removed stopwords from. We might also question if certain words are turning up so much in every document that they won't add anything to the topics that the topic model finds (removing frequently appearing words will also reduce the time it takes for the algorithm to fit the topic model). We might consider if, in the Nobel corpus, the word "nobel" will add anything to any of the topics, especially if we are treating the documents as the speeches as a whole. It might or might or not, topic models take some experimentation.
 
-Lastly, the alpha parameter controls how much documents come to be dominated by one or few topics or if the topics are more evenly distributed over documents. This parameter is automatically optimized by the algorithm if the user does not set it, but often algothithmic optimization does not lead to the best model fit from the standpoint of a human. This model tends toward a low alpha and very uneven topic spread so we'll set it ourselves. Again, this is something the analyst must experiment with.
+Lastly, the alpha parameter controls how much documents come to be dominated by one or few topics or if the topics are more evenly distributed over documents. This parameter is automatically optimized by the algorithm if the user does not set it, but often algorithmic optimization does not lead to the best model fit from the standpoint of a human. This model tends toward a low alpha and very uneven topic spread so we'll set it ourselves. Again, this is something the analyst must experiment with.
 
 ```{r}
 k = 15
@@ -129,7 +142,7 @@ topics %>%
 
 Or look at the distribution of specific topics over time.
 
-```{r, eval = FALSE}
+```{r}
 # This one requires a more balanced topic mixture to be very meaningful, which the Nobel corpus with its current fit does to have
 topics %>%
   filter(str_detect(new_topic, "war")) %>%
@@ -140,8 +153,49 @@ topics %>%
 
 # STM
 
-There are several packages in R that fit topic models, most notably ``stm`` which is incorporates a host of handy visualization tools as well as the capacity to incorporate covariates into the model fit (@roberts2019stm). 
+There are several packages in R that fit topic models, most notably ``stm`` which is incorporates a host of handy visualization tools as well as the capacity to incorporate covariates into the model fit. 
 
+```{r, echo=FALSE, out.width="70%"}
+knitr::include_graphics("data/stm.png")
+```
+See (@roberts2019stm).
+
+Here's a brief example of how we can use ``quanteda`` to create a document-feature matrix and then throw that into ``stm``.
+
+```{r, message=FALSE}
+nobel <- read_rds("nobel_cleaned.Rds")
+nobel_decade <- nobel %>%
+  mutate(decade = Year %/% 10 * 10) %>%
+  mutate(Period = ifelse(Year <= 1945, "Pre-WWII", "Post-WWII")) %>%
+  corpus(text_field = 'AwardSpeech') %>%
+  tokens(remove_numbers = TRUE, remove_punc = TRUE) %>%
+  dfm() %>%
+  dfm_remove(pattern = stop_words$word) %>%
+  dfm_group(groups = decade)
+fit10 <- stm(nobel_decade, K = 10, max.em.its = 5, init.type = "Spectral")
+plot(fit10)
+```
+
+This shows us the ten topics we requested it find and the expected proportions. The topics dominate individual documents it looks like, making this perhaps not the best example, but one we'll do just to show the mechanics of ``stm``.
+
+```{r, message=FALSE}
+nobel_periods <- nobel %>%
+  #mutate(decade = Year %/% 10 * 10) %>%
+  mutate(Period = ifelse(Year <= 1945, "Pre-WWII", "Post-WWII")) %>%
+  corpus(text_field = 'AwardSpeech') %>%
+  tokens(remove_numbers = TRUE, remove_punc = TRUE) %>%
+  dfm() %>%
+  dfm_remove(pattern = stop_words$word)
+# setting EM iterations to 10 for speed -- normally this should be many more (often set at 75)
+fit10_period <- stm(nobel_periods, K = 10, content =~Period, prevalence =~ Period, max.em.its = 5, init.type = "Spectral")
+plot(fit10_period)
+```
+
+We have now fitted this topic model with the covariable ``Period`` denoting pre- or post-WWII and this then allows us to further examine, for example, for each topic the words in the topic that are more associated with one variable or the other.
+
+```{r}
+plot(fit10_period, type = "perspectives", topics = 9)
+```
 
 ## Excercises
 - Run a topic model on the sustainability report corpus. How can we deal with year variables when they are not the name of the document?
@@ -152,5 +206,36 @@ There are several packages in R that fit topic models, most notably ``stm`` whic
 This is only the most basic of introductions to topic modeling. For more information on topic modeling and analysis in the tidyverse, see chapter 6 of @silge2017text. 
 
 For a good explainer on topic models, see @underwood2012.
+
+# Cosine frequency
+
+Another way to think about differences between documents is cosine frequency. If we imagine each document being represented by a vector in n-dimensional space, where the values of the vector are the counts (more often tf-idfs in practice) of words contained in the document, then we can use very simple math to measure the angle of distance between two document vectors. This is refered to as cosine difference - stemming from the law of cosines and closely related to the *dot product* for those who remember that from math class. Fittingly for cosines, 1 denotes that the vectors are pointing the exact same direction and that there is no different -- what would happen if measured the distace between two documents or multiples of the same document. Zero denotes no similarity -- we would say they are *orthogonal* -- there is no overlap in vocabulary. Important to remember in interpreting cosine distances is that they are only significant between the two documents you are comparing -- if document A has low cosine distance to both documents B and C, this does not denote that B and C are similar, they are simply both not similar to A (they might be dissimilar in quite different ways.)
+
+Let's look at a quick implementation.
+```{r}
+(cosine_diff <- textstat_simil(nobel_decade, method = "cosine"))
+```
+
+We have used ``quanteda`` to do this and with it come a bunch of nice features (you see above how easy it was to stopword). ``Quanteda`` also makes it easy to trim our corpus in ways that might make more sense to run analysis on.
+
+```{r}
+dfm_small <- dfm_trim(nobel_decade, min_termfreq = 3, min_docfreq = 2)
+```
+
+`Quanteda` has multiples ways to test proximity, distance, and so on. One way of visualizing distance might be clustering -- to take all documents (here the documents are each decade's worth of Nobel award speeches) and break them into two clusters based on their Euclidean distance, to do it again, and again, and so forth.
+
+```{r}
+eu_dist <- textstat_dist(dfm_weight(nobel_decade, scheme = "prop"))
+cluster <- hclust(as.dist(eu_dist))
+cluster$labels <- docnames(nobel_decade)
+plot(cluster, xlab = "", sub = "", main = "Clustered Euclidean Distance")
+```
+
+Finally, another way to envision differences between documents is to calculate the "keyness", which analyses relative term frequency between documents. Here we make the target group post-WWII Nobel speeches, and the baseline those from 1905 up to WWII.
+
+```{r}
+keyness <- textstat_keyness(nobel_decade, target = nobel_decade$decade >= 1945)
+textplot_keyness(keyness)
+```
 
 # References

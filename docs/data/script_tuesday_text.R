@@ -12,9 +12,9 @@ rm(list=ls())
 setwd("P:/Work/Stellen/Innlandet/2022/Quantifying history")
 nobel <- read_rds("nobel_cleaned.Rds")
 
-## Tidy data
+#### Tidy data
 
-#### from yesterday
+## from yesterday
 nobel %>%
   mutate(peace = str_count(AwardSpeech, "[Pp]eace")) %>%
   mutate(thankyou = str_count(AwardSpeech, "[Th]ank you")) %>%
@@ -24,7 +24,7 @@ nobel %>%
   geom_line(aes(x = Year, y = thankyou, color = "blue")) +
   geom_line(aes(x = Year, y = war, color = "red"))
 
-# better way
+## better way
 nobel %>%
   mutate(peace = str_count(AwardSpeech, "[Pp]eace")) %>%
   mutate(war = str_count(AwardSpeech, "[Ww]ar")) %>%
@@ -35,7 +35,6 @@ nobel %>%
   geom_line()
 
 ## Not recode, but case_when
-
 nobel %>%
   mutate(wc = str_count(AwardSpeech, "[\\w]+")) %>%
   mutate(period = case_when(
@@ -46,15 +45,12 @@ nobel %>%
   group_by(period) %>%
   summarize(mean(wc))
 
-## Other example, on the website, by decade
+# Other example, on the website, by decade
 
 
-### Word frequency tables
+#### Word frequency tables
 
-# Load the data from wherever you have saved it -- here the example shows a "data" folder in my working drive
-nobel <- read_rds("data/nobel_cleaned.Rds")
-
-# TIDY TEXT
+### TIDY TEXT
 
 # unnest_tokens -- show on one example
 
