@@ -8,6 +8,7 @@ output:
     number_sections: true
 bibliography: textanalysis.bib
 ---
+[Script](data/thursday_script_text.R) for download.
 
 # Model training
 
@@ -82,7 +83,8 @@ politics %>%
   ggplot() + 
   geom_text(aes(x=`similarity to "violation" - "rights"`,
                 y=`similarity to "war" - "peace"`,
-                label=word))
+                label=word)) +
+  labs(x = "Rights <----> Violation", y = "Peace <-----> War")
 ```
 
 ``wordVectors`` includes multiple nice plotting features. One is via principle component analysis, which reduces many dimensions to a smaller number (here 2) based on the two most informative dimensions running through the original many-dimensional space. Here we'll try to compare words grouped around "peace". 

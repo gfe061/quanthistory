@@ -6,9 +6,11 @@ library(stm)
 library(topicmodels)
 library(quanteda)
 library(quanteda.textstats)
+library(SnowballC)
 
 # load nobel
-# set working directory
+rm(list=ls())
+setwd("P:/Work/Stellen/Innlandet/2022/Quantifying history")
 nobel <- read_rds("nobel_cleaned.Rds")
 
 #### From yesterday
@@ -41,12 +43,12 @@ nob %>%
   ylab('n') +
   xlab("2-gram")
 
+library(widyr)
 #### co-occurence
 nobel %>%
   unnest_tokens(word, AwardSpeech) %>%
   filter(!word %in% stop_words$word) %>%
   pairwise_count(word, Year, sort = TRUE)
-
 
 # tfidf by decade
 tfidf_dec <- nobel %>%
@@ -98,8 +100,9 @@ cluster$labels <- docnames(nobel_dfm)
 # plot as a dendrogram
 plot(cluster, xlab = "", sub = "", main = "Clustered Euclidean Distance")
 
+library(quanteda.textplots)
 # Keyness
-keyness <- textstat_keyness(nobel_decade, target = nobel_decade$decade >= 1945)
+keyness <- textstat_keyness(nobel_dfm, target = nobel_dfm$decade >= 1945)
 textplot_keyness(keyness)
 
 
@@ -117,8 +120,8 @@ nobel_dtm <- nobel_stemmed %>%
   count(word_stem, sort = TRUE) %>%
   cast_dtm(Year, word_stem, n)
 
-k = 15
-alpha = 2
+k <- 10
+alpha <- 2
 
 nobel_tm <- LDA(nobel_dtm, k = k, alpha = alpha)
 
